@@ -50,7 +50,7 @@ console.log(userInfo)
     window.open(MANAGER_WHATSAPP, '_blank');
 
   };
-console.log(userInfo)
+
   const tryAdminLogin = () => {
     if (adminPassword === ADMIN_PASSWORD) {
       navigate('/admin');  // Переход в админ-панель
@@ -61,33 +61,37 @@ console.log(userInfo)
     }
   };
 
-  const handlePay = async () => {
-    if (!amountUsd) {
-      alert('Введите сумму');
-      return;
-    }
-    const amount = parseFloat(amountUsd);
-    if (isNaN(amount) || amount < 13) {
-      setIsError(true);
-      alert('Сумма должна быть не меньше 13 USD');
-      return;
-    }
+ const handlePay = async () => {
+  if (!amountUsd) {
+    alert('Введите сумму');
+    return;
+  }
+  const amount = parseFloat(amountUsd);
+  if (isNaN(amount) || amount < 13) {
+    setIsError(true);
+    alert('Сумма должна быть не меньше 13 USD');
+    return;
+  }
 
-    setIsError(false);
+  setIsError(false);
 
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/payment/create`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amountUsd: amount, payCurrency, pubg_id: userInfo.pubg_id }),
-      });
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/payment/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amountUsd: amount, payCurrency, pubg_id: userInfo.pubg_id }),
+    });
 
-      const data = await response.json();
-      navigate('/crypto-payment', { state: { invoiceUrl: data.invoice_url } });
-    } catch (e) {
-      alert('Ошибка: ' + e.message);
-    }
-  };
+    const data = await response.json();
+  
+
+    // Открываем ссылку в новой вкладке вместо навигации
+    window.open(data.invoice_url, '_blank', 'noopener,noreferrer');
+  } catch (e) {
+    alert('Ошибка: ' + e.message);
+  }
+};
+
 
   if (!userInfo) {
     return <div style={styles.centered}>Пользователь не авторизован</div>;
@@ -195,7 +199,7 @@ const styles = {
     width: '100%',
     padding: 12,
     borderRadius: 6,
-    border: `2px solid ${PUBG_DARK_GREEN}`,
+    
     marginBottom: 14,
     fontSize: 16,
   },
