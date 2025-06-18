@@ -200,9 +200,6 @@ export default function CurrentTournament() {
       <div style={styles.container}>
         <h2 style={styles.title}>
           Турнир #{tournament.id}
-          <button style={styles.rulesButton} onClick={() => navigate('/Instruction')}>
-             ℹ️
-          </button>
         </h2>
         
         {timeLeft !== null && (
@@ -252,9 +249,36 @@ export default function CurrentTournament() {
               </button>
             </div>
             
-            <button style={styles.enterLobbyButton} onClick={openLobbyPubg}>
-              <span style={styles.enterLobbyButtonText}>Открыть сайт Pubg Mobile</span>
-            </button>
+           <button
+  onClick={() => {
+    window.location.href = "pubgmobile://";
+    setTimeout(() => {
+      window.location.href = "https://play.google.com/store/apps/details?id=com.tencent.ig";
+    }, 1500);
+  }}
+  style={{
+    padding: '14px 28px',
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#fff',
+    backgroundColor: '#1E3D23',
+    border: 'none',
+    borderRadius: '8px',
+    boxShadow: '0 4px 10px rgba(30, 61, 35, 0.3)',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease',
+    userSelect: 'none',
+    width: '100%',
+    maxWidth: '320px',
+    margin: '20px auto',
+    display: 'block',
+  }}
+  onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#2B5B36')}
+  onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#1E3D23')}
+>
+  Открыть PUBG Mobile
+</button>
+
           </div>
         )}
       </div>
