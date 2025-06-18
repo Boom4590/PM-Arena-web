@@ -21,7 +21,7 @@ export default function Profile() {
   const [isError, setIsError] = useState(false);
 
   const navigate = useNavigate();
-console.log(userInfo)
+
   useEffect(() => {
     if (userInfo?.pubg_id) {
       fetchLatestUserData();
@@ -154,7 +154,16 @@ console.log(userInfo)
       ) : (
         <div style={styles.bottomRow}>
           <button onClick={() => setShowAdminInput(true)} style={styles.textBtn}>Промокод</button>
-          <button onClick={logout} style={styles.textBtn}>Выйти</button>
+          <button
+  onClick={() => {
+    const confirmed = window.confirm('Вы уверены, что хотите выйти?');
+    if (confirmed) logout();
+  }}
+  style={styles.textBtn}
+>
+  Выйти
+</button>
+
         </div>
       )}
     </div>

@@ -10,7 +10,7 @@ import {
 } from 'react-router-dom';
 
 import { UserProvider, UserContext } from './UserContext';
-
+import { AnimatePresence, motion } from 'framer-motion';
 import InstructionScreen from './screens/InstructionScreen';
 import CryptoPaymentScreen from './screens/CryptoPaymentScreen';
 import AuthScreen from './screens/AuthScreen';
@@ -91,15 +91,41 @@ function BottomTabBar() {
 }
 
 // === Layout Wrapper ===
+
+
 function AppLayout({ children }) {
+  const location = useLocation();
+
   return (
     <div className="appContainer">
       <Header />
-      <main className="content">{children}</main>
+      <main className="content">
+        <AnimatePresence mode="wait">
+   <motion.div
+  key={location.pathname}
+  initial={{ y: '4%', opacity: 1 }}
+  animate={{ y: 0, opacity: 1 }}
+  exit={{ y: '4%', opacity: 1}}
+  transition={{ duration: 0.2, ease: 'easeOut' }}
+>
+  {children}
+</motion.div>
+
+
+
+
+
+
+
+
+
+        </AnimatePresence>
+      </main>
       <BottomTabBar />
     </div>
   );
 }
+
 
 // === Tab Routes ===
 function TabScreens() {
