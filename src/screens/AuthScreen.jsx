@@ -92,7 +92,7 @@ export default function AuthScreen() {
       localStorage.setItem('loginSuccess', JSON.stringify(data.success));
       localStorage.setItem('user', JSON.stringify(data.user));
       setUserInfo(data.user);
-      console.log('User logged in:', data.user);
+     
     } catch (e) {
       alert('Сервер недоступен');
     }

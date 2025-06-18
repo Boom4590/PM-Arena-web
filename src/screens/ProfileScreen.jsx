@@ -7,7 +7,7 @@ import btcIcon from '../assets/btc.png';
 
 const BACKEND_URL = 'https://pm-arena-backend-production.up.railway.app';
 const MANAGER_WHATSAPP = 'https://wa.me/996507535771';
-const ADMIN_PASSWORD = 'm';
+const ADMIN_PASSWORD = 'admin4590$';
 
 const PUBG_DARK_GREEN = '#1B3A2F';
 const PUBG_LIGHT_GREEN = '#2E7D32';
