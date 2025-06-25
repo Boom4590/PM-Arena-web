@@ -9,8 +9,17 @@ const BACKEND_URL = 'https://pm-arena-backend-production.up.railway.app';
 const MANAGER_WHATSAPP = 'https://wa.me/996507535771';
 const ADMIN_PASSWORD = 'admin4590$';
 
-const PUBG_DARK_GREEN = '#1B3A2F';
-const PUBG_LIGHT_GREEN = '#2E7D32';
+// Новые цвета дизайна
+const BACKGROUND = '#121212';
+const CARD_BG = '#2C2C2C';
+const ACCENT = '#F0A400';
+const ACCENT_HOVER = '#FFB300';
+const TEXT_COLOR = '#FFFFFF';
+const INPUT_BG = '#1E1E1E';
+const INPUT_BORDER = '#444';
+const INPUT_FOCUS_BORDER = ACCENT;
+const LINK_COLOR = '#29B6F6';
+const ERROR_COLOR = '#D7263D';
 
 export default function Profile() {
   const { userInfo, setUserInfo } = useContext(UserContext);
@@ -19,6 +28,13 @@ export default function Profile() {
   const [showAdminInput, setShowAdminInput] = useState(false);
   const [payCurrency, setPayCurrency] = useState('btc');
   const [isError, setIsError] = useState(false);
+  
+  // Состояния для hover-эффектов
+  const [hoverPay, setHoverPay] = useState(false);
+  const [hoverManager, setHoverManager] = useState(false);
+  const [hoverAdmin, setHoverAdmin] = useState(false);
+  const [hoverCancel, setHoverCancel] = useState(false);
+  const [focusAmount, setFocusAmount] = useState(false);
 
   const navigate = useNavigate();
 
@@ -43,17 +59,16 @@ export default function Profile() {
   const logout = () => {
     setUserInfo(null);
     localStorage.removeItem('userInfo');
-    navigate('/'); // Можно перенаправить на страницу логина, если нужно
+    navigate('/');
   };
 
   const handleManagerContact = () => {
     window.open(MANAGER_WHATSAPP, '_blank');
-
   };
 
   const tryAdminLogin = () => {
     if (adminPassword === ADMIN_PASSWORD) {
-      navigate('/admin');  // Переход в админ-панель
+      navigate('/admin');
       setShowAdminInput(false);
       setAdminPassword('');
     } else {
@@ -61,50 +76,50 @@ export default function Profile() {
     }
   };
 
- const handlePay = async () => {
-  if (!amountUsd) {
-    alert('Введите сумму');
-    return;
-  }
-  const amount = parseFloat(amountUsd);
-  if (isNaN(amount) || amount < 13) {
-    setIsError(true);
-    alert('Сумма должна быть не меньше 13 USD');
-    return;
-  }
+  const handlePay = async () => {
+    if (!amountUsd) {
+      alert('Введите сумму');
+      return;
+    }
+    const amount = parseFloat(amountUsd);
+    if (isNaN(amount) || amount < 13) {
+      setIsError(true);
+      alert('Сумма должна быть не меньше 13 USD');
+      return;
+    }
 
-  setIsError(false);
+    setIsError(false);
 
-  try {
-    const response = await fetch(`${BACKEND_URL}/api/payment/create`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amountUsd: amount, payCurrency, pubg_id: userInfo.pubg_id }),
-    });
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/payment/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amountUsd: amount, payCurrency, pubg_id: userInfo.pubg_id }),
+      });
 
-    const data = await response.json();
-  
-
-    // Открываем ссылку в новой вкладке вместо навигации
-    window.open(data.invoice_url, '_blank', 'noopener,noreferrer');
-  } catch (e) {
-    alert('Ошибка: ' + e.message);
-  }
-};
-
+      const data = await response.json();
+      window.open(data.invoice_url, '_blank', 'noopener,noreferrer');
+    } catch (e) {
+      alert('Ошибка: ' + e.message);
+    }
+  };
 
   if (!userInfo) {
-    return <div style={styles.centered}>Пользователь не авторизован</div>;
+    return <div style={{...styles.centered, color: TEXT_COLOR}}>Пользователь не авторизован</div>;
   }
 
   return (
     <div style={styles.container}>
       <div style={styles.profileRow}>
-        <img src={profileImage} alt="Profile" style={styles.image} />
-        <div>
-          <div style={styles.label}><strong>Pubg ID:</strong> {userInfo.pubg_id}</div>
-          <div style={styles.label}><strong>Никнейм:</strong> {userInfo.nickname}</div>
-          <div style={styles.label}><strong>Телефон:</strong> {userInfo.phone}</div>
+        <img 
+          src={profileImage} 
+          alt="Profile" 
+          style={{...styles.image, border: `2px solid ${ACCENT}`}} 
+        />
+        <div style={styles.flexx}>
+          <div style={styles.label}><strong>Pubg ID:</strong><div>{userInfo.pubg_id}</div> </div>
+          <div style={styles.label}><strong>Никнейм:</strong> <div>{userInfo.nickname}</div></div>
+          <div style={styles.label}><strong>Телефон:</strong> <div>{userInfo.phone}</div></div>
         </div>
       </div>
 
@@ -117,19 +132,50 @@ export default function Profile() {
         placeholder="Сумма в USD"
         value={amountUsd}
         onChange={(e) => setAmountUsd(e.target.value)}
-        style={{ ...styles.input, ...(isError ? styles.inputError : {}) }}
+        onFocus={() => setFocusAmount(true)}
+        onBlur={() => setFocusAmount(false)}
+        style={{ 
+          ...styles.input, 
+          borderColor: isError 
+            ? ERROR_COLOR 
+            : (focusAmount ? INPUT_FOCUS_BORDER : INPUT_BORDER)
+        }}
       />
 
-      <button onClick={handlePay} style={styles.button}>
+      <button 
+        onClick={handlePay} 
+        style={{
+          ...styles.button,
+          backgroundColor: hoverPay ? ACCENT_HOVER : ACCENT,
+        }}
+        onMouseEnter={() => setHoverPay(true)}
+        onMouseLeave={() => setHoverPay(false)}
+      >
         <img src={btcIcon} alt="btc" style={styles.icon} /> Пополнить криптой
       </button>
 
       {amountUsd && parseFloat(amountUsd) < 13 ? (
-        <button onClick={handleManagerContact} style={styles.managerBtn}>
+        <button 
+          onClick={handleManagerContact} 
+          style={{
+            ...styles.managerBtn,
+            backgroundColor: hoverManager ? '#4fc3f7' : LINK_COLOR,
+          }}
+          onMouseEnter={() => setHoverManager(true)}
+          onMouseLeave={() => setHoverManager(false)}
+        >
           Если у вас меньше 13, можно пополнить через менеджера →
         </button>
       ) : (
-        <button onClick={handleManagerContact} style={styles.managerBtn}>
+        <button 
+          onClick={handleManagerContact} 
+          style={{
+            ...styles.managerBtn,
+            backgroundColor: hoverManager ? '#4fc3f7' : LINK_COLOR,
+          }}
+          onMouseEnter={() => setHoverManager(true)}
+          onMouseLeave={() => setHoverManager(false)}
+        >
           <img src={whatsappIcon} alt="whatsapp" style={styles.icon} /> Оплатить через менеджера
         </button>
       )}
@@ -144,26 +190,50 @@ export default function Profile() {
             style={styles.input}
           />
           <div style={styles.adminBtnRow}>
-            <button onClick={tryAdminLogin} style={styles.adminBtn}>Подтвердить</button>
-            <button onClick={() => {
-              setAdminPassword('');
-              setShowAdminInput(false);
-            }} style={styles.cancelBtn}>Отмена</button>
+            <button 
+              onClick={tryAdminLogin}
+              style={{
+                ...styles.adminBtn,
+                backgroundColor: hoverAdmin ? ACCENT_HOVER : ACCENT,
+              }}
+              onMouseEnter={() => setHoverAdmin(true)}
+              onMouseLeave={() => setHoverAdmin(false)}
+            >
+              Подтвердить
+            </button>
+            <button 
+              onClick={() => {
+                setAdminPassword('');
+                setShowAdminInput(false);
+              }}
+              style={{
+                ...styles.cancelBtn,
+                backgroundColor: hoverCancel ? '#666' : '#444',
+              }}
+              onMouseEnter={() => setHoverCancel(true)}
+              onMouseLeave={() => setHoverCancel(false)}
+            >
+              Отмена
+            </button>
           </div>
         </div>
       ) : (
         <div style={styles.bottomRow}>
-          <button onClick={() => setShowAdminInput(true)} style={styles.textBtn}>Промокод</button>
+          <button 
+            onClick={() => setShowAdminInput(true)} 
+            style={{...styles.textBtn, color: LINK_COLOR}}
+          >
+            Промокод
+          </button>
           <button
-  onClick={() => {
-    const confirmed = window.confirm('Вы уверены, что хотите выйти?');
-    if (confirmed) logout();
-  }}
-  style={styles.textBtn}
->
-  Выйти
-</button>
-
+            onClick={() => {
+              const confirmed = window.confirm('Вы уверены, что хотите выйти?');
+              if (confirmed) logout();
+            }}
+            style={{...styles.textBtn, color: LINK_COLOR}}
+          >
+            Выйти
+          </button>
         </div>
       )}
     </div>
@@ -175,120 +245,167 @@ const styles = {
     padding: 30,
     maxWidth: 500,
     margin: '0 auto',
-    backgroundColor: '#fff',
-    fontFamily: 'sans-serif',
+    backgroundColor: BACKGROUND,
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    minHeight: '100vh',
+    color: TEXT_COLOR,
   },
-  profileRow: {
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: 20,
-    border: `2px solid ${PUBG_DARK_GREEN}`,
-    borderRadius: 8,
-    padding: 16,
-  },
+ profileRow: {
+  display: 'flex',
+  alignItems: 'center',
+  marginBottom: 30,
+  backgroundColor: CARD_BG,
+  borderRadius: 12,
+  padding: 20,
+  gap: 20,
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+},
+
   image: {
     width: 90,
     height: 90,
-    borderRadius: 45,
-    marginRight: 16,
-    border: `2px solid ${PUBG_DARK_GREEN}`,
+    borderRadius: '50%',
+    marginRight: 20,
+    objectFit: 'cover',
   },
-  label: {
-    marginBottom: 8,
-    fontSize: 14,
-  },
+label: {
+width:'100%',
+  marginBottom: 10,
+  display: 'flex',
+  justifyContent:'space-between',
+  fontSize: 17,
+  lineHeight: 1.4,
+},
+
   balanceBox: {
-    padding: 10,
-    border: '1px solid #aaa',
-    borderRadius: 6,
-    marginBottom: 20,
+  
+    padding: 15,
+    backgroundColor: '#222',
+    borderRadius: 10,
+    marginBottom: 25,
     textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
   },
+ flexx: {
+  width:'60%',
+  display: 'flex',
+  flexDirection: 'column', // если хочешь вертикально
+  alignItems: 'flex-start', // прижать к левому краю по поперечной оси
+  justifyContent: 'space-between', // прижать к верхнему краю по основной оси
+  gap: '8px', // отступы между элементами для ровного визуала (по желанию)
+}
+,
   input: {
     width: '100%',
-    padding: 12,
-    borderRadius: 6,
-    
-    marginBottom: 14,
+    padding: 14,
+    borderRadius: 8,
+    marginBottom: 20,
     fontSize: 16,
-  },
-  inputError: {
-    borderColor: 'red',
+    backgroundColor: INPUT_BG,
+    color: TEXT_COLOR,
+    border: '1px solid',
+    outline: 'none',
+    transition: 'border-color 0.3s',
   },
   button: {
     width: '100%',
-    padding: 14,
-    backgroundColor: PUBG_DARK_GREEN,
-    color: '#fff',
+    padding: 16,
+    color: '#000',
     fontSize: 16,
     fontWeight: 'bold',
-    borderRadius: 6,
+    borderRadius: 8,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: 15,
     cursor: 'pointer',
-    gap: 8,
+    gap: 10,
+    border: 'none',
+    transition: 'background-color 0.3s, transform 0.2s',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+    ':hover': {
+      transform: 'translateY(-2px)'
+    }
   },
   icon: {
-    width: 20,
-    height: 20,
+    width: 24,
+    height: 24,
   },
   managerBtn: {
     width: '100%',
-    padding: 12,
-    backgroundColor: PUBG_LIGHT_GREEN,
+    padding: 14,
     color: '#fff',
     fontWeight: 'bold',
-    borderRadius: 6,
+    borderRadius: 8,
     cursor: 'pointer',
     marginBottom: 20,
+    backgroundColor:'rgb(0 122 63)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 10,
+    border: 'none',
+    transition: 'background-color 0.3s, transform 0.2s',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+    ':hover': {
+      transform: 'translateY(-2px)'
+    }
   },
   adminBtnRow: {
     display: 'flex',
     justifyContent: 'space-between',
     marginTop: 20,
+    gap: 10,
   },
   adminBtn: {
     flex: 1,
-    marginRight: 10,
-    padding: 12,
-    backgroundColor: PUBG_DARK_GREEN,
-    color: '#fff',
+    padding: 14,
+    color: '#000',
     fontWeight: 'bold',
-    borderRadius: 6,
+    borderRadius: 8,
     cursor: 'pointer',
+    border: 'none',
+    transition: 'background-color 0.3s, transform 0.2s',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.2)',
+    ':hover': {
+      transform: 'translateY(-2px)'
+    }
   },
   cancelBtn: {
     flex: 1,
-    padding: 12,
-    backgroundColor: '#eee',
-    color: PUBG_DARK_GREEN,
+    padding: 14,
+    color: TEXT_COLOR,
     fontWeight: 'bold',
-    borderRadius: 6,
+    borderRadius: 8,
     cursor: 'pointer',
+    border: 'none',
+    transition: 'background-color 0.3s, transform 0.2s',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.2)',
+    ':hover': {
+      transform: 'translateY(-2px)'
+    }
   },
   textBtn: {
     background: 'none',
     border: 'none',
-    color: PUBG_DARK_GREEN,
-    textDecoration: 'underline',
+    textDecoration: 'none',
     cursor: 'pointer',
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 15,
+    transition: 'color 0.3s',
+    ':hover': {
+      textDecoration: 'underline',
+    }
   },
   bottomRow: {
     display: 'flex',
     justifyContent: 'space-between',
-    marginTop: 30,
+    marginTop: 25,
   },
   centered: {
     padding: 50,
     textAlign: 'center',
-    color: '#555',
   },
 };

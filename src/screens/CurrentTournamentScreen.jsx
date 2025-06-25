@@ -1,31 +1,23 @@
 import React, { useEffect, useState, useRef, useContext } from 'react';
-import { UserContext } from '../UserContext'; // Убедитесь, что путь верный
-import { MdContentCopy } from "react-icons/md"; // Иконка для копирования
+import { UserContext } from '../UserContext';
+import { MdContentCopy } from "react-icons/md";
 import { useNavigate } from 'react-router-dom';
-// Предполагается, что изображение лежит в папке `src/assets`
- import pubgImage from '../assets/pubger.png'; 
-// Если изображения нет, можно использовать URL
+import { motion } from 'framer-motion';
+
+// Цветовая схема в стиле киберспорта
+const COLORS = {
+  primary: '#121212',
+  cardBg: '#1E1E1E',
+  accent: '#F0A400',
+  secondary: '#29B6F6',
+  error: '#D7263D',
+  text: '#FFFFFF',
+  textSecondary: '#A0A0A0',
+  success: '#4CAF50',
+  warning: '#FF9800'
+};
 
 const BACKEND_URL = 'https://pm-arena-backend-production.up.railway.app';
-
-// Внедряем CSS-анимации в документ
-const animationStyles = `
-  @keyframes glow {
-    0% { border-color: #1E90FF; color: #1E90FF; }
-    50% { border-color: #00BFFF; color: #00BFFF; }
-    100% { border-color: #1E90FF; color: #1E90FF; }
-  }
-`;
-
-// Helper-компонент для стилей
-const StyleInjector = ({ children }) => {
-  return (
-    <>
-      <style>{animationStyles}</style>
-      {children}
-    </>
-  );
-};
 
 export default function CurrentTournament() {
   const { userInfo } = useContext(UserContext);
@@ -34,9 +26,11 @@ export default function CurrentTournament() {
   const [lobbyVisible, setLobbyVisible] = useState(false);
   const [lobbyCountdown, setLobbyCountdown] = useState(null);
   const [startTime, setStartTime] = useState(null);
+  const [copied, setCopied] = useState({ room: false, password: false });
 
   const pollingRef = useRef(null);
   const lobbyTimerRef = useRef(null);
+  const navigate = useNavigate();
 
   // --- Функции-хелперы ---
   function clearLobbyTimer() {
@@ -46,20 +40,16 @@ export default function CurrentTournament() {
     }
   }
 
-  function copyToClipboard(text) {
+  function copyToClipboard(text, type) {
     navigator.clipboard.writeText(text).then(() => {
-      alert(`Скопировано: ${text}`);
+      setCopied({ ...copied, [type]: true });
+      setTimeout(() => setCopied({ ...copied, [type]: false }), 2000);
     }).catch(err => {
       console.error('Не удалось скопировать текст: ', err);
-      alert('Ошибка при копировании');
     });
   }
 
-  // Заглушка для навигации
-    const navigate = useNavigate();
-  
   const openLobbyPubg = () => {
-    // В вебе мы не можем открыть приложение напрямую, поэтому откроем сайт
     window.open('https://www.pubgmobile.com/', '_blank');
   };
 
@@ -75,7 +65,6 @@ export default function CurrentTournament() {
       });
 
       if (!res.ok) {
-        // Если турнира нет, бэкенд может вернуть ошибку, это нормальное поведение
         setTournament(null);
         return;
       }
@@ -97,7 +86,6 @@ export default function CurrentTournament() {
       const lobbyKey = `lobbyShown_${userInfo.pubg_id}_${data.id}`;
       const lobbyStartKey = `lobbyStart_${userInfo.pubg_id}_${data.id}`;
 
-      // Используем localStorage вместо AsyncStorage
       const storedLobbyShown = localStorage.getItem(lobbyKey);
       const storedLobbyStart = localStorage.getItem(lobbyStartKey);
 
@@ -157,11 +145,10 @@ export default function CurrentTournament() {
       return;
     }
     
-    fetchCurrentTournament(); // Первый запуск
+    fetchCurrentTournament();
     
-    pollingRef.current = setInterval(fetchCurrentTournament, 20000); // Опрос каждые 20 сек
+    pollingRef.current = setInterval(fetchCurrentTournament, 20000);
 
-    // Обновление данных при возвращении на вкладку (аналог 'focus' в React Navigation)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         fetchCurrentTournament();
@@ -186,281 +173,394 @@ export default function CurrentTournament() {
     return () => clearInterval(interval);
   }, [startTime]);
 
-
   if (!tournament) {
     return (
       <div style={styles.container}>
-        <p style={styles.noTournamentText}>У вас нет текущего турнира.</p>
+        <div style={styles.emptyState}>
+          <h3 style={styles.emptyTitle}>Текущий турнир не найден</h3>
+          <p style={styles.emptyText}>Участвуйте в турнирах, чтобы видеть здесь активные события</p>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            style={styles.tournamentsButton}
+            onClick={() => navigate('/tournaments')}
+          >
+            Посмотреть турниры
+          </motion.button>
+        </div>
       </div>
     );
   }
 
   return (
-    <StyleInjector>
-      <div style={styles.container}>
-        <h2 style={styles.title}>
-          Турнир #{tournament.id}
-        </h2>
-        
-        {timeLeft !== null && (
-          <div style={styles.timerBox}>
-            <p style={styles.timerLabel}>Осталось:</p>
-            <p style={styles.timer}>{formatTime(timeLeft)}</p>
+    <div style={styles.container}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        style={styles.header}
+      >
+        <h1 style={styles.title}>Текущий турнир</h1>
+        <p style={styles.subtitle}>#{tournament.id} · {tournament.mode}</p>
+        <p style={{ color: COLORS.textSecondary, marginTop: 4 }}>
+          Дата начала: {formatStartDate(startTime)}
+        </p>
+      </motion.div>
+
+      {!lobbyVisible && lobbyCountdown !== null && (
+        <motion.div 
+          style={styles.lobbyCountdownBox}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.3 }}
+        >
+          <div style={styles.lobbyCountdownIcon}>🔒</div>
+          <div style={styles.lobbyCountdownText}>
+            Доступ к лобби откроется через: 
+            <span style={styles.lobbyCountdownTime}> {lobbyCountdown} сек</span>
           </div>
-        )}
+        </motion.div>
+      )}
 
-        <div style={styles.infoBox}>
-          <p style={styles.infoText}>Режим: <span style={styles.infoBold}>{tournament.mode}</span></p>
-          <p style={styles.infoText}>Начало: <span style={styles.infoBold}>{new Date(tournament.start_time).toLocaleString()}</span></p>
-          <p style={styles.infoText}>Ваше место: <span style={styles.infoBold2}>{tournament.seat}</span></p>
-          <button style={styles.animatedButton} onClick={() => navigate(`/lobby?currentUserSlot=${tournament.seat}`) }>
-            Посмотреть мой слот
-          </button>
-        </div>
-
-        {!lobbyVisible && lobbyCountdown !== null && (
-          <div style={styles.lobbyCountdownBox}>
-            <p style={styles.lobbyCountdownText}>
-              Лобби появится через: {lobbyCountdown} сек
-            </p>
+      {lobbyVisible && (
+        <motion.div 
+          style={styles.lobbyBox}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.4 }}
+        >
+          <div style={styles.lobbyHeader}>
+            <div style={styles.lobbyIcon}>🎮</div>
+            <h3 style={styles.lobbyTitle}>Данные лобби</h3>
           </div>
-        )}
 
-        {lobbyVisible && (
-          <div style={styles.lobbyBox}>
-            <div style={styles.lobbyHeader}>
-              <img src={pubgImage} alt="PUBG Icon" style={styles.lobbyIcon} />
-              <p style={styles.lobbyHeaderText}>Данные лобби</p>
+          <div style={styles.lobbyInfo}>
+            <div style={styles.lobbyField}>
+              <div style={styles.lobbyLabel}>ID комнаты:</div>
+              <div style={styles.lobbyValueContainer}>
+                <div style={styles.lobbyValue}>{tournament.room_id}</div>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  style={styles.copyButton}
+                  onClick={() => copyToClipboard(tournament.room_id, 'room')}
+                >
+                  <MdContentCopy size={18} color={copied.room ? COLORS.accent : COLORS.textSecondary} />
+                </motion.button>
+                {copied.room && <div style={styles.copiedText}>Скопировано!</div>}
+              </div>
             </div>
 
-            <div style={styles.copyRow}>
-              <span style={styles.lobbyLabel}>Комната:</span>
-              <span style={styles.lobbyValue}>{tournament.room_id}</span>
-              <button style={styles.copyButton} onClick={() => copyToClipboard(tournament.room_id)}>
-                <MdContentCopy color="#444" size={17} />
-              </button>
+            <div style={styles.lobbyField}>
+              <div style={styles.lobbyLabel}>Пароль:</div>
+              <div style={styles.lobbyValueContainer}>
+                <div style={styles.lobbyValue}>{tournament.room_password}</div>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  style={styles.copyButton}
+                  onClick={() => copyToClipboard(tournament.room_password, 'password')}
+                >
+                  <MdContentCopy size={18} color={copied.password ? COLORS.accent : COLORS.textSecondary} />
+                </motion.button>
+                {copied.password && <div style={styles.copiedText}>Скопировано!</div>}
+              </div>
             </div>
-
-            <div style={styles.copyRow}>
-              <span style={styles.lobbyLabel}>Пароль:</span>
-              <span style={styles.lobbyValue}>{tournament.room_password}</span>
-              <button style={styles.copyButton} onClick={() => copyToClipboard(tournament.room_password)}>
-                <MdContentCopy color="#444" size={17} />
-              </button>
-            </div>
-            
-           <button
-  onClick={() => {
-    window.location.href = "pubgmobile://";
-    setTimeout(() => {
-      window.location.href = "https://play.google.com/store/apps/details?id=com.tencent.ig";
-    }, 1500);
-  }}
-  style={{
-    padding: '14px 28px',
-    fontSize: '18px',
-    fontWeight: '600',
-    color: '#fff',
-    backgroundColor: '#1E3D23',
-    border: 'none',
-    borderRadius: '8px',
-    boxShadow: '0 4px 10px rgba(30, 61, 35, 0.3)',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s ease',
-    userSelect: 'none',
-    width: '100%',
-    maxWidth: '320px',
-    margin: '20px auto',
-    display: 'block',
-  }}
-  onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#2B5B36')}
-  onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#1E3D23')}
->
-  Открыть PUBG Mobile
-</button>
-
           </div>
-        )}
+          
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+            style={styles.openPubgButton}
+            onClick={openLobbyPubg}
+          >
+            Открыть PUBG Mobile
+          </motion.button>
+        </motion.div>
+      )}
+
+      <div style={styles.content}>
+        <motion.div 
+          style={styles.card}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+        >
+          <div style={styles.cardHeader}>
+            <div style={styles.cardIcon}>⏱️</div>
+            <div>
+              <div style={styles.cardLabel}>До начала турнира</div>
+              <div style={styles.cardValue}>{formatTimeWithDays(timeLeft)}</div>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div 
+          style={styles.card}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+        >
+          <div style={styles.cardHeader}>
+            <div style={styles.cardIcon}>📍</div>
+            <div>
+              <div style={styles.cardLabel}>Ваше место</div>
+              <div style={styles.cardValue}>#{tournament.seat}</div>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.button
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.98 }}
+          style={styles.viewSlotButton}
+          onClick={() => navigate(`/lobby?currentUserSlot=${tournament.seat}`)}
+        >
+          Посмотреть мой слот в лобби
+        </motion.button>
       </div>
-    </StyleInjector>
+    </div>
   );
 }
 
-function formatTime(sec) {
-  if (sec == null || sec < 0) return '00:00:00';
-  const days = Math.floor(sec / (3600 * 24));
-  const hours = Math.floor((sec % (3600 * 24)) / 3600);
+// Форматирование даты старта турнира
+function formatStartDate(timestamp) {
+  if (!timestamp) return '';
+  const options = {
+    weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hour12: false,
+  };
+  return new Date(timestamp).toLocaleString('ru-RU', options);
+}
+
+// Форматирование таймера с днями
+function formatTimeWithDays(sec) {
+  if (sec == null || sec < 0) return '00:00:00:00';
+  const days = Math.floor(sec / 86400);
+  const hours = Math.floor((sec % 86400) / 3600);
   const minutes = Math.floor((sec % 3600) / 60);
   const seconds = sec % 60;
-  const dayStr = days > 0 ? `${days}д ` : '';
-  return `${dayStr}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  return `${String(days).padStart(2, '0')}:${String(hours).padStart(2, '0')}:` + 
+         `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
 const styles = {
   container: {
-    
-    margin: '0 auto',
-    backgroundColor: '#f2f2f7',
-    padding: '20px',
-    fontFamily: 'Arial, sans-serif',
+    flex: 1,
+    backgroundColor: COLORS.primary,
+    padding: '16px',
+    minHeight: '100vh',
+    fontFamily: '"Rajdhani", "Arial Narrow", sans-serif',
   },
-  animatedButton: {
-    backgroundColor: '#fff',
-    padding: '10px 16px',
-    borderRadius: '6px',
-    border: '1.6px solid',
+  header: {
+    marginBottom: '24px',
+    padding: '0 8px',
+  },
+  title: {
+    fontSize: '28px',
+    fontWeight: 700,
+    margin: 0,
+    background: `linear-gradient(45deg, ${COLORS.accent}, ${COLORS.secondary})`,
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    textShadow: '0 0 15px rgba(240, 164, 0, 0.3)',
+  },
+  subtitle: {
+    fontSize: '16px',
+    color: COLORS.textSecondary,
+    margin: '8px 0 0',
+  },
+  content: {
+    display: 'grid',
+    gap: '16px',
+  },
+  card: {
+    background: COLORS.cardBg,
+    borderRadius: '12px',
+    padding: '20px',
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+  },
+  cardHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+  },
+  cardIcon: {
+    fontSize: '32px',
+    background: 'rgba(41, 182, 246, 0.1)',
+    width: '60px',
+    height: '60px',
+    borderRadius: '50%',
+    display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: '12px',
-    boxShadow: '0 2px 3px rgba(0,0,0,0.2)',
-    fontSize: '14px',
-    fontWeight: 'bold',
-    letterSpacing: '1px',
-    cursor: 'pointer',
-    animation: 'glow 2s infinite ease-in-out', // Применяем CSS анимацию
+    color: COLORS.secondary,
   },
-  enterLobbyButton: {
-    backgroundColor: '#666',
-    padding: '10px 16px',
-    borderRadius: '8px',
-    textAlign: 'center',
-    marginTop: '6px',
-    boxShadow: '0 2px 3px rgba(0,0,0,0.3)',
+  cardLabel: {
+    fontSize: '16px',
+    color: COLORS.textSecondary,
+    marginBottom: '4px',
+  },
+  cardValue: {
+    fontSize: '28px',
+    fontWeight: 700,
+    color: COLORS.text,
+  },
+  viewSlotButton: {
+    background: `linear-gradient(45deg, ${COLORS.accent}, #FF8C00)`,
+    color: COLORS.primary,
+    fontWeight: 700,
+    fontSize: '16px',
+    padding: '16px',
+    borderRadius: '12px',
     border: 'none',
     cursor: 'pointer',
+    marginTop: '8px',
+    transition: 'all 0.2s ease',
   },
-  enterLobbyButtonText: {
-    color: '#f1c40f', // Золотистый стиль PUBG
-    fontSize: '14px',
-    fontWeight: 'bold',
-    letterSpacing: '1px',
+  lobbyCountdownBox: {
+    background: COLORS.cardBg,
+    borderRadius: '12px',
+    padding: '20px',
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    marginTop: '8px',
+  },
+  lobbyCountdownIcon: {
+    fontSize: '32px',
+    background: 'rgba(240, 164, 0, 0.1)',
+    width: '60px',
+    height: '60px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: COLORS.accent,
+  },
+  lobbyCountdownText: {
+    fontSize: '16px',
+    color: COLORS.text,
+    fontWeight: 600,
+  },
+  lobbyCountdownTime: {
+    color: COLORS.accent,
+    fontWeight: 700,
+    marginLeft: '4px',
+  },
+  lobbyBox: {
+    background: COLORS.cardBg,
+    borderRadius: '12px',
+    padding: '20px',
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    marginTop: '8px',
   },
   lobbyHeader: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: '10px',
-    position: 'relative',
+    gap: '12px',
+    marginBottom: '20px',
   },
   lobbyIcon: {
+    fontSize: '32px',
+    background: 'rgba(240, 164, 0, 0.1)',
     width: '60px',
     height: '60px',
     borderRadius: '50%',
-    position: 'absolute',
-    left: 0,
-    top: '50%',
-    transform: 'translateY(-50%)',
-    objectFit: 'contain',
-  },
-  lobbyHeaderText: {
-    fontSize: '16px',
-    fontWeight: '700',
-    color: '#222',
-  },
-  title: {
-    fontSize: '20px',
-    marginTop: '16px',
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: '8px',
-    color: '#2c3e50',
-  },
-  timerBox: {
-    backgroundColor: '#fff',
-    borderLeft: '3px solid #e74c3c',
-    padding: '8px 12px',
-    borderRadius: '10px',
-    marginBottom: '16px',
-    textAlign: 'center',
-    boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
-  },
-  timerLabel: {
-    fontSize: '12px',
-    color: '#7f8c8d',
-  },
-  timer: {
-    fontSize: '16px',
-    fontWeight: 'bold',
-    color: '#e74c3c',
-  },
-  infoBox: {
-    backgroundColor: '#ffffff',
-    padding: '12px',
-    borderRadius: '12px',
-    marginBottom: '16px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-  },
-  infoText: {
-    fontSize: '12px',
-    color: '#34495e',
-    marginBottom: '4px',
-  },
-  infoBold: {
-    fontWeight: '600',
-    color: '#333333',
-  },
-  infoBold2: {
-    fontWeight: '800',
-    color: '#000',
-    marginLeft: '4px'
-  },
-  lobbyBox: {
-    backgroundColor: '#ffffff',
-    padding: '12px',
-    borderRadius: '12px',
-    marginBottom: '40px',
-    boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
-  },
-  copyRow: {
     display: 'flex',
     alignItems: 'center',
-    marginBottom: '8px',
+    justifyContent: 'center',
+    color: COLORS.accent,
   },
-  copyButton: {
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    padding: '5px'
+  lobbyTitle: {
+    fontSize: '20px',
+    fontWeight: 700,
+    color: COLORS.text,
+    margin: 0,
+  },
+  lobbyInfo: {
+    display: 'grid',
+    gap: '16px',
+  },
+  lobbyField: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
   },
   lobbyLabel: {
-    fontSize: '12px',
-    fontWeight: '500',
-    color: '#2c3e50',
-    width: '70px',
+    fontSize: '14px',
+    color: COLORS.textSecondary,
+    fontWeight: 600,
+  },
+  lobbyValueContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    background: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: '8px',
+    padding: '12px 16px',
   },
   lobbyValue: {
-    fontSize: '12px',
-    color: '#2c3e50',
     flex: 1,
-  },
-  lobbyCountdownBox: {
-    backgroundColor: '#fff',
-    borderLeft: '3px solid #2980b9',
-    padding: '8px 12px',
-    borderRadius: '10px',
-    marginBottom: '16px',
-    textAlign: 'center',
-    boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
-  },
-  lobbyCountdownText: {
     fontSize: '16px',
-    fontWeight: 'bold',
-    color: '#2980b9',
+    fontWeight: 600,
+    color: COLORS.text,
+    userSelect: 'all',
   },
-  noTournamentText: {
-    fontSize: '14px',
-    color: '#7f8c8d',
-    fontStyle: 'italic',
-    textAlign: 'center',
-    marginTop: '30px',
-  },
-  rulesButton: {
-    padding: '4px 8px',
-    borderRadius: '4px',
-    marginLeft: '10px',
-    fontSize: '16px',
-    background: 'none',
+  copyButton: {
+    background: 'transparent',
     border: 'none',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    outline: 'none',
+  },
+  copiedText: {
+    color: COLORS.accent,
+    fontSize: '12px',
+    fontWeight: 600,
+    userSelect: 'none',
+  },
+  openPubgButton: {
+    marginTop: '20px',
+    width: '100%',
+    background: `linear-gradient(45deg, ${COLORS.accent}, #FF8C00)`,
+    color: COLORS.primary,
+    fontWeight: 700,
+    fontSize: '18px',
+    padding: '14px',
+    borderRadius: '12px',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
+  emptyState: {
+    textAlign: 'center',
+    marginTop: '80px',
+    color: COLORS.textSecondary,
+  },
+  emptyTitle: {
+    fontSize: '24px',
+    fontWeight: 700,
+    marginBottom: '12px',
+    color: COLORS.text,
+  },
+  emptyText: {
+    fontSize: '16px',
+    marginBottom: '20px',
+  },
+  tournamentsButton: {
+    background: `linear-gradient(45deg, ${COLORS.accent}, #FF8C00)`,
+    border: 'none',
+    borderRadius: '12px',
+    color: COLORS.primary,
+    padding: '14px 28px',
+    fontWeight: 700,
+    fontSize: '16px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
   },
 };

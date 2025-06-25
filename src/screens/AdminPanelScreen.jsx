@@ -293,22 +293,7 @@ export default function AdminPanel() {
         </div>
       )}
 
-      <div onClick={() => toggleSection('findSeat')} style={styles.sectionHeader}>
-        <h3 style={styles.sectionTitle}>Найти Seat по PUBG ID</h3>
-      </div>
-      {activeSection === 'findSeat' && (
-        <div style={styles.sectionContent}>
-          <input type="text" placeholder="PUBG ID" value={searchPubgId} onChange={(e) => setSearchPubgId(e.target.value.replace(/[^0-9]/g, ''))} maxLength={10} style={styles.input} />
-          <button onClick={findSeatByPubgId} style={styles.button}>Найти</button>
-          {foundSeat !== null && (
-            <p style={{ marginTop: '10px', fontSize: '16px' }}>
-              Место (seat): <span style={{ fontWeight: 'bold' }}>{foundSeat}</span>
-            </p>
-          )}
-        </div>
-      )}
-      
-      <div onClick={() => toggleSection('topup')} style={styles.sectionHeader}>
+       <div onClick={() => toggleSection('topup')} style={styles.sectionHeader}>
         <h3 style={styles.sectionTitle}>Пополнить баланс пользователя</h3>
       </div>
       {activeSection === 'topup' && (

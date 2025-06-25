@@ -1,5 +1,6 @@
+
 import React, { useState, useContext } from 'react';
-import { UserContext } from '../UserContext'; // Убедитесь, что путь верный
+import { UserContext } from '../UserContext';
 
 const BACKEND_URL = 'https://pm-arena-backend-production.up.railway.app';
 
@@ -22,7 +23,7 @@ export default function AuthScreen() {
   };
   
   const handleSubmit = (event) => {
-    event.preventDefault(); // Предотвращаем перезагрузку страницы
+    event.preventDefault();
     if (isRegister) {
       register();
     } else {
@@ -98,155 +99,237 @@ export default function AuthScreen() {
     }
   }
 
+
   return (
     <div style={styles.container}>
+      <div style={styles.header}>
+        <div style={styles.logo}>PM ARENA</div>
+        <div style={styles.subtitle}>КИБЕРСПОРТИВНАЯ ПЛАТФОРМА</div>
+      </div>
+      
       <form style={styles.card} onSubmit={handleSubmit}>
-        <h1 style={styles.title}>{isRegister ? 'Регистрация' : 'Вход'}</h1>
+        <h1 style={styles.title}>{isRegister ? 'РЕГИСТРАЦИЯ' : 'ВХОД В СИСТЕМУ'}</h1>
 
-        <label htmlFor="pubg_id" style={styles.label}>PUBG MOBILE ID</label>
-        <input
-          id="pubg_id"
-          style={{ ...styles.input, ...(errorPubgId ? styles.inputError : {}) }}
-          placeholder="Введите PUBG ID"
-          value={pubg_id}
-          type="text" // Используем text для контроля через JS
-          maxLength={10}
-          onChange={(e) => handlePubgIdChange(e.target.value)}
-        />
-        {!!errorPubgId && <p style={styles.errorText}>{errorPubgId}</p>}
+        <div style={styles.inputContainer}>
+          <label htmlFor="pubg_id" style={styles.label}>PUBG ID</label>
+          <input
+            id="pubg_id"
+            style={{ ...styles.input, ...(errorPubgId ? styles.inputError : {}) }}
+            placeholder="Введите ваш PUBG ID"
+            value={pubg_id}
+            type="text"
+            maxLength={10}
+            onChange={(e) => handlePubgIdChange(e.target.value)}
+          />
+          {!!errorPubgId && <p style={styles.errorText}>{errorPubgId}</p>}
+        </div>
 
         {isRegister && (
           <>
-            <label htmlFor="nickname" style={styles.label}>Никнейм</label>
-            <input
-              id="nickname"
-              style={styles.input}
-              placeholder="Введите никнейм"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-            />
+            <div style={styles.inputContainer}>
+              <label htmlFor="nickname" style={styles.label}>ИГРОВОЙ НИК</label>
+              <input
+                id="nickname"
+                style={styles.input}
+                placeholder="Ваш игровой никнейм"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+              />
+            </div>
 
-            <label htmlFor="phone" style={styles.label}>Номер телефона</label>
-            <input
-              id="phone"
-              style={styles.input}
-              placeholder="Введите номер телефона"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
+            <div style={styles.inputContainer}>
+              <label htmlFor="phone" style={styles.label}>ТЕЛЕФОН</label>
+              <input
+                id="phone"
+                style={styles.input}
+                placeholder="+996 XXX XXX XXX"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </div>
           </>
         )}
 
-        <label htmlFor="password" style={styles.label}>Пароль</label>
-        <input
-          id="password"
-          style={styles.input}
-          placeholder="Введите пароль"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div style={styles.inputContainer}>
+          <label htmlFor="password" style={styles.label}>ПАРОЛЬ</label>
+          <input
+            id="password"
+            style={styles.input}
+            placeholder="Создайте надежный пароль"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
 
         <button type="submit" style={styles.button}>
-          <span style={styles.buttonText}>{isRegister ? 'Зарегистрироваться' : 'Войти'}</span>
+          <span style={styles.buttonText}>{isRegister ? 'СОЗДАТЬ АККАУНТ' : 'ВОЙТИ'}</span>
         </button>
 
-        <p style={styles.switch} onClick={() => setIsRegister(!isRegister)}>
-          {isRegister ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться'}
-        </p>
+       <p style={styles.switch} onClick={() => setIsRegister(!isRegister)}>
+  {isRegister ? (
+    <>
+      Уже зарегистрированы? <span style={styles.switchHighlight}>Войти в систему</span>
+    </>
+  ) : (
+    <>
+      Новый игрок? <span style={styles.switchHighlight}>Создать аккаунт</span>
+    </>
+  )}
+</p>
       </form>
+      
+      <div style={styles.footer}>
+        <p style={styles.footerText}>© 2023 PM ARENA | Киберспортивные турниры</p>
+      </div>
     </div>
   );
 }
 
-// Константы и стили для веб-версии
-const ACCENT_COLOR = '#2f4f4f'; // темно-зеленый/оливковый
-const BACKGROUND = '#fff';
+// Новая киберспортивная палитра
+const PRIMARY_COLOR = '#121212';       // Основной темный фон
+const ACCENT_COLOR = '#F0A400';        // Акцентный оранжевый (энергия, действие)
+const SECONDARY_COLOR = '#29B6F6';     // Неоново-синий (технологии)
+const ERROR_COLOR = '#D7263D';         // Ошибки/предупреждения
+const CARD_BG = '#1E1E1E';             // Фон карточек
+const TEXT_LIGHT = '#FFFFFF';          // Основной текст
+const TEXT_SECONDARY = '#A0A0A0';      // Вторичный текст
 
 const styles = {
   container: {
     display: 'flex',
+    flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: '100vh',
     padding: '20px',
-    backgroundColor: BACKGROUND,
-    fontFamily: 'Arial, sans-serif',
+    backgroundColor: PRIMARY_COLOR,
+    fontFamily: '"Rajdhani", "Arial Narrow", sans-serif',
+    backgroundImage: 'radial-gradient(circle at 10% 20%, rgba(41, 182, 246, 0.1) 0%, rgba(41, 182, 246, 0) 20%), radial-gradient(circle at 90% 80%, rgba(240, 164, 0, 0.1) 0%, rgba(240, 164, 0, 0) 20%)',
+    color: TEXT_LIGHT,
+  },
+  header: {
+    textAlign: 'center',
+    marginBottom: '30px',
+  },
+  logo: {
+    fontSize: '42px',
+    fontWeight: '900',
+    letterSpacing: '4px',
+    textTransform: 'uppercase',
+    background: `linear-gradient(45deg, ${ACCENT_COLOR}, ${SECONDARY_COLOR})`,
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    textShadow: '0 0 15px rgba(240, 164, 0, 0.3)',
+    marginBottom: '8px',
+  },
+  subtitle: {
+    fontSize: '14px',
+    fontWeight: '600',
+    letterSpacing: '3px',
+    color: TEXT_SECONDARY,
   },
   card: {
-    backgroundColor: BACKGROUND,
+    backgroundColor: CARD_BG,
     borderRadius: '12px',
-    padding: '25px',
-    boxShadow: `0 4px 12px rgba(30, 47, 47, 0.3)`, // аналог shadow* и elevation
-    border: `2px solid ${ACCENT_COLOR}`,
+    padding: '30px',
     width: '100%',
-    maxWidth: '400px',
+    maxWidth: '450px',
+    border: `1px solid rgba(255, 255, 255, 0.1)`,
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
   },
   title: {
-    fontSize: '28px',
-    fontWeight: '900',
-    color: ACCENT_COLOR,
-    marginBottom: '25px',
+    fontSize: '24px',
+    fontWeight: '700',
+    color: TEXT_LIGHT,
+    marginBottom: '30px',
     textAlign: 'center',
-    letterSpacing: '2px',
+    letterSpacing: '1.5px',
     textTransform: 'uppercase',
+    position: 'relative',
+    paddingBottom: '15px',
+  },
+
+  inputContainer: {
+    marginBottom: '20px',
   },
   label: {
-    fontWeight: '700',
-    color: ACCENT_COLOR,
-    marginTop: '12px',
-    marginBottom: '6px',
-    fontSize: '14px',
+    fontWeight: '600',
+    color: TEXT_SECONDARY,
+    marginBottom: '8px',
+    fontSize: '13px',
     letterSpacing: '1px',
-    display: 'block', // чтобы margin работал корректно
+    display: 'block',
+    textTransform: 'uppercase',
   },
   input: {
-    border: '2px solid #aaa',
-    borderRadius: '6px',
-    padding: '10px 15px',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
+    borderRadius: '8px',
+    padding: '14px 16px',
     fontSize: '16px',
-    color: '#222',
-    backgroundColor: '#f9f9f9',
+    color: TEXT_LIGHT,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
     width: '100%',
-    boxSizing: 'border-box', // чтобы padding не увеличивал ширину
+    boxSizing: 'border-box',
+    transition: 'all 0.3s ease',
   },
   inputError: {
-    borderColor: 'red',
+    borderColor: ERROR_COLOR,
+    boxShadow: `0 0 0 2px rgba(215, 38, 61, 0.2)`,
   },
   errorText: {
-    color: 'red',
-    marginTop: '3px',
-    marginBottom: '6px',
-    fontWeight: '700',
-    fontSize: '12px',
-    marginLeft: '4px',
+    color: ERROR_COLOR,
+    marginTop: '6px',
+    fontWeight: '600',
+    fontSize: '13px',
   },
   button: {
-    marginTop: '24px',
-    backgroundColor: ACCENT_COLOR,
-    padding: '14px',
-    borderRadius: '6px',
+    marginTop: '15px',
+    background: `linear-gradient(45deg, ${ACCENT_COLOR}, #FF8C00)`,
+    padding: '16px',
+    borderRadius: '8px',
     textAlign: 'center',
     border: 'none',
     cursor: 'pointer',
     width: '100%',
-    boxShadow: `0 4px 6px rgba(30, 47, 47, 0.5)`,
+    transition: 'all 0.3s ease',
+    boxShadow: `0 4px 15px rgba(240, 164, 0, 0.3)`,
+    position: 'relative',
+    overflow: 'hidden',
   },
   buttonText: {
-    color: 'white',
-    fontWeight: '900',
-    fontSize: '17px',
-    letterSpacing: '1.2px',
+    color: PRIMARY_COLOR,
+    fontWeight: '800',
+    fontSize: '16px',
+    letterSpacing: '1.5px',
     textTransform: 'uppercase',
+    position: 'relative',
+    zIndex: 2,
   },
   switch: {
-    marginTop: '18px',
-    color: ACCENT_COLOR,
-    fontWeight: '600',
+    marginTop: '25px',
+    color: TEXT_SECONDARY,
+    fontWeight: '500',
     textAlign: 'center',
-    textDecoration: 'underline',
     fontSize: '14px',
     cursor: 'pointer',
+    lineHeight: '1.6',
+  },
+  switchHighlight: {
+    color: SECONDARY_COLOR,
+    fontWeight: '700',
+    cursor: 'pointer',
+    textDecoration: 'none',
+    transition: 'all 0.3s ease',
+  },
+  footer: {
+    marginTop: '40px',
+    textAlign: 'center',
+  },
+  footerText: {
+    fontSize: '12px',
+    color: TEXT_SECONDARY,
+    letterSpacing: '1px',
   },
 };
