@@ -19,9 +19,23 @@ const COLORS = {
 
 const BACKEND_URL = 'https://pm-arena-backend-production.up.railway.app';
 
+// Упрощенные варианты анимации
+const fadeIn = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  transition: { duration: 0.3 }
+};
+
+const slideUp = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.3 }
+};
+
 export default function CurrentTournament() {
   const { userInfo } = useContext(UserContext);
   const [tournament, setTournament] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState(null);
   const [lobbyVisible, setLobbyVisible] = useState(false);
   const [lobbyCountdown, setLobbyCountdown] = useState(null);
@@ -56,7 +70,11 @@ export default function CurrentTournament() {
   // --- Основная логика ---
   async function fetchCurrentTournament() {
     try {
-      if (!userInfo?.pubg_id) return;
+      setLoading(true);
+      if (!userInfo?.pubg_id) {
+        setTournament(null);
+        return;
+      }
 
       const res = await fetch(`${BACKEND_URL}/current`, {
         method: 'POST',
@@ -135,6 +153,8 @@ export default function CurrentTournament() {
     } catch (err) {
       console.error(err);
       setTournament(null);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -142,6 +162,7 @@ export default function CurrentTournament() {
   useEffect(() => {
     if (!userInfo || !userInfo.pubg_id) {
       setTournament(null);
+      setLoading(false);
       return;
     }
     
@@ -173,6 +194,22 @@ export default function CurrentTournament() {
     return () => clearInterval(interval);
   }, [startTime]);
 
+  // Показываем спиннер во время загрузки
+  if (loading) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.loadingContainer}>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            style={styles.spinner}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Показываем сообщение, если турнир не найден после загрузки
   if (!tournament) {
     return (
       <div style={styles.container}>
@@ -194,12 +231,8 @@ export default function CurrentTournament() {
 
   return (
     <div style={styles.container}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        style={styles.header}
-      >
+      {/* Упрощенная анимация для заголовка */}
+      <motion.div {...fadeIn} style={styles.header}>
         <h1 style={styles.title}>Текущий турнир</h1>
         <p style={styles.subtitle}>#{tournament.id} · {tournament.mode}</p>
         <p style={{ color: COLORS.textSecondary, marginTop: 4 }}>
@@ -207,13 +240,9 @@ export default function CurrentTournament() {
         </p>
       </motion.div>
 
+      {/* Блоки с упрощенными анимациями */}
       {!lobbyVisible && lobbyCountdown !== null && (
-        <motion.div 
-          style={styles.lobbyCountdownBox}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.3 }}
-        >
+        <motion.div {...slideUp} style={styles.lobbyCountdownBox}>
           <div style={styles.lobbyCountdownIcon}>🔒</div>
           <div style={styles.lobbyCountdownText}>
             Доступ к лобби откроется через: 
@@ -223,12 +252,7 @@ export default function CurrentTournament() {
       )}
 
       {lobbyVisible && (
-        <motion.div 
-          style={styles.lobbyBox}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.4 }}
-        >
+        <motion.div {...slideUp} style={styles.lobbyBox}>
           <div style={styles.lobbyHeader}>
             <div style={styles.lobbyIcon}>🎮</div>
             <h3 style={styles.lobbyTitle}>Данные лобби</h3>
@@ -280,27 +304,18 @@ export default function CurrentTournament() {
       )}
 
       <div style={styles.content}>
-        <motion.div 
-          style={styles.card}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-        >
+        {/* Карточки с упрощенной анимацией */}
+        <motion.div {...slideUp} style={styles.card}>
           <div style={styles.cardHeader}>
             <div style={styles.cardIcon}>⏱️</div>
-            <div>
-              <div style={styles.cardLabel}>До начала турнира</div>
+            <div style={{display:'flex',flexDirection:'column',alignItems:'flex-start'}}>
+              <div style={styles.cardLabel}>ID и Пароль лобби появится через:</div>
               <div style={styles.cardValue}>{formatTimeWithDays(timeLeft)}</div>
             </div>
           </div>
         </motion.div>
 
-        <motion.div 
-          style={styles.card}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
-        >
+        <motion.div {...slideUp} style={styles.card}>
           <div style={styles.cardHeader}>
             <div style={styles.cardIcon}>📍</div>
             <div>
@@ -311,6 +326,7 @@ export default function CurrentTournament() {
         </motion.div>
 
         <motion.button
+          {...slideUp}
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.98 }}
           style={styles.viewSlotButton}
@@ -562,5 +578,19 @@ const styles = {
     fontSize: '16px',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
+  },
+  // Стили для спиннера
+  loadingContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+  },
+  spinner: {
+    width: '50px',
+    height: '50px',
+    border: `5px solid ${COLORS.cardBg}`,
+    borderTop: `5px solid ${COLORS.accent}`,
+    borderRadius: '50%',
   },
 };

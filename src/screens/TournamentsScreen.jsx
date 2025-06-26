@@ -7,16 +7,18 @@ const BACKEND_URL = 'https://pm-arena-backend-production.up.railway.app';
 
 // Цветовая схема в стиле киберспорта
 const COLORS = {
-  primary: '#121212',
-  cardBg: '#1E1E1E',
-  accent: '#F0A400',
-  secondary: '#29B6F6',
-  error: '#D7263D',
-  text: '#FFFFFF',
-  textSecondary: '#A0A0A0',
-  success: '#4CAF50',
-  warning: '#FF9800'
+  primary: '#121212',              // Чёрный основной фон
+  cardBg: '#1A1A1A',               // Тёмные карточки с глубиной
+  accent: '#FFB300',               // Мягкий янтарно-жёлтый (лучше чем ядро-жёлтый)
+  secondary: '#00B8D4',            // Холодный неон для градиента
+  tertiary: '#7C4DFF',             // Фиолетовый для редких вкраплений
+  text: '#E0E0E0',                 // Светлый текст
+  textSecondary: '#9E9E9E',        // Вторичный текст
+  error: '#EF5350',                // Красный, не режущий глаз
+  success: '#66BB6A',              // Зелёный подтверждения
+  warning: '#FFA726',              // Оранжевый для предупреждений
 };
+
 
 export default function Tournaments() {
   const { userInfo } = useContext(UserContext);
@@ -148,7 +150,8 @@ export default function Tournaments() {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h1 style={styles.title}>Доступные турниры</h1>
+        <h1 style={styles.title}><span style={styles.titleText}>Доступные турниры</span></h1>
+
         <p style={styles.subtitle}>Выберите турнир и участвуйте за призовые</p>
       </div>
 
@@ -208,17 +211,17 @@ export default function Tournaments() {
                   
                   <div style={styles.cardGrid}>
                     <div style={styles.gridItem}>
-                      <div style={styles.gridLabel}>💵 Вход:</div>
+                      <div style={styles.gridLabel}>💵 Вход билет:</div>
                       <div style={styles.gridValue}>{item.entry_fee}$</div>
                     </div>
                     
                     <div style={styles.gridItem}>
-                      <div style={styles.gridLabel}>🏆 Приз:</div>
+                      <div style={styles.gridLabel}>🏆 Приз. фонд:</div>
                       <div style={styles.gridValue}>{item.prize_pool}$</div>
                     </div>
                     
                     <div style={styles.gridItem}>
-                      <div style={styles.gridLabel}>🕒 Старт:</div>
+                      <div style={styles.gridLabel}>🕒 Дата Начало:</div>
                       <div style={{ ...styles.gridValue, color: COLORS.textSecondary }}>
                         {startTimeStr}
                       </div>
@@ -304,7 +307,7 @@ export default function Tournaments() {
               </div>
               
               <p style={styles.modalText}>
-                После подтверждения сумма будет списана с вашего баланса. Отменить участие можно не менее чем за 1 час до начала турнира.
+                После подтверждения сумма будет списана с вашего баланса. Отменить участие нельзя.
               </p>
               
               <div style={styles.modalButtons}>
@@ -338,7 +341,7 @@ const styles = {
   container: {
     padding: '16px 32px',
     fontFamily: '"Rajdhani", "Arial Narrow", sans-serif',
-    background: COLORS.primary,
+    background: `linear-gradient(45deg, #000, #333,#000)`,
     minHeight: '100vh',
     color: COLORS.text,
   },
@@ -346,15 +349,22 @@ const styles = {
     marginBottom: '24px',
     padding: '0 8px',
   },
-  title: {
-    fontSize: '28px',
-    fontWeight: 700,
-    margin: 0,
-    background: `linear-gradient(45deg, ${COLORS.accent}, ${COLORS.secondary})`,
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    textShadow: '0 0 15px rgba(240, 164, 0, 0.3)',
-  },
+ title: {
+  fontSize: '28px',
+  fontWeight: 700,
+  margin: 0,
+  textAlign: 'center', // или 'center', как тебе нужно
+},
+titleText: {
+  background: `linear-gradient(180deg,rgb(214, 154, 2), rgb(214, 154, 2))`,
+  WebkitBackgroundClip: 'text',
+  textAlign:'center',
+  WebkitTextFillColor: 'transparent',
+ 
+  textShadow: '0 0 15px rgba(240, 164, 0, 0.3)',
+}
+,
+
   subtitle: {
     fontSize: '16px',
     color: COLORS.textSecondary,
@@ -366,12 +376,14 @@ const styles = {
     gap: '36px',
   },
   card: {
-    background: COLORS.cardBg,
-    borderRadius: '12px',
+    background: '#222',
+borderRadius: '12px',
+boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+border: '1px solid rgba(255,255,255,0.06)',
+
+  
     padding: '20px 40px',
-    boxShadow: '0 2px 8px rgba(255, 255, 255, 0.05)',
-    border: '1px solid rgba(255,255,255,0.08)',
-    display: 'flex',
+   display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
     gap: '12px',

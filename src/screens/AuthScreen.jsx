@@ -156,7 +156,7 @@ export default function AuthScreen() {
           <input
             id="password"
             style={styles.input}
-            placeholder="Создайте надежный пароль"
+            placeholder="Пароль"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

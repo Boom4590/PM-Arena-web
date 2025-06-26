@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 
 export default function InstructionScreen() {
   const [lang, setLang] = useState('ru');
-
   const toggleLang = () => setLang(lang === 'ru' ? 'kg' : 'ru');
 
   const rulesText = {
@@ -102,8 +101,9 @@ export default function InstructionScreen() {
 
   const renderList = (arr, style) =>
     arr.map((item, idx) => (
-      <li key={idx} style={{ ...styles.text, ...style, marginBottom: 6 }}>
-        {item}
+      <li key={idx} style={{ ...styles.text, ...style }}>
+        <div style={styles.listBullet}>•</div>
+        <div style={styles.listItemText}>{item}</div>
       </li>
     ));
 
@@ -111,161 +111,199 @@ export default function InstructionScreen() {
     <div style={styles.container}>
       {/* Языковой переключатель */}
       <div style={styles.fixedTopBar}>
-        <button onClick={toggleLang} style={styles.toggleButton} aria-label="Switch language">
+        <button 
+          onClick={toggleLang} 
+          style={styles.toggleButton}
+          aria-label={lang === 'ru' ? 'Переключить на кыргызский' : 'Switch to Russian'}
+        >
           <span style={styles.flagText}>{lang === 'ru' ? '🇰🇬' : '🇷🇺'}</span>
           <span style={styles.langText}>{lang === 'ru' ? 'Кыргызча' : 'Русский'}</span>
         </button>
       </div>
 
-      <h1 style={styles.title}>{t.title}</h1>
+      <div style={styles.contentContainer}>
+        <h1 style={styles.title}>{t.title}</h1>
 
-      <section style={{ ...styles.section, ...styles.sectionGold }}>
-        <h2 style={styles.sectionTitle}>{t.extraRulesTitle}</h2>
-        <ul style={styles.list}>{renderList(t.extraRules)}</ul>
-      </section>
+        <div style={styles.rulesContainer}>
+          <section style={{ ...styles.section, ...styles.sectionImportant }}>
+            <h2 style={styles.sectionTitle}>{t.extraRulesTitle}</h2>
+            <ul style={styles.list}>{renderList(t.extraRules)}</ul>
+          </section>
 
-      <section style={{ ...styles.section, ...styles.sectionGold }}>
-        <h2 style={styles.sectionTitle}>{t.rewardsTitle}</h2>
-        <ul style={styles.list}>{renderList(t.rewards)}</ul>
-      </section>
+          <section style={{ ...styles.section, ...styles.sectionImportant }}>
+            <h2 style={styles.sectionTitle}>{t.rewardsTitle}</h2>
+            <ul style={styles.list}>{renderList(t.rewards)}</ul>
+          </section>
 
-      <section style={{ ...styles.section, ...styles.sectionRed }}>
-        <h2 style={styles.sectionTitle}>{t.bansTitle}</h2>
-        <ul style={styles.list}>{renderList(t.bans, styles.red)}</ul>
-      </section>
+          <section style={{ ...styles.section, ...styles.sectionWarning }}>
+            <h2 style={styles.sectionTitle}>{t.bansTitle}</h2>
+            <ul style={styles.list}>{renderList(t.bans, styles.warningText)}</ul>
+          </section>
 
-      <section style={{ ...styles.section, ...styles.sectionGray }}>
-        <h2 style={styles.sectionTitle}>{t.section2Title}</h2>
-        <ul style={styles.list}>{renderList(t.section2)}</ul>
-      </section>
+          <div style={styles.grid}>
+            <section style={{ ...styles.section, ...styles.sectionInfo }}>
+              <h2 style={styles.sectionTitle}>{t.section2Title}</h2>
+              <ul style={styles.list}>{renderList(t.section2)}</ul>
+            </section>
 
-      <section style={{ ...styles.section, ...styles.sectionGray }}>
-        <h2 style={styles.sectionTitle}>{t.section3Title}</h2>
-        <ul style={styles.list}>{renderList(t.section3)}</ul>
-      </section>
+            <section style={{ ...styles.section, ...styles.sectionInfo }}>
+              <h2 style={styles.sectionTitle}>{t.section3Title}</h2>
+              <ul style={styles.list}>{renderList(t.section3)}</ul>
+            </section>
+          </div>
 
-      <section style={{ ...styles.section, ...styles.sectionGray }}>
-        <h2 style={styles.sectionTitle}>{t.section4Title}</h2>
-        <ul style={styles.list}>{renderList(t.section4)}</ul>
-      </section>
+          <section style={{ ...styles.section, ...styles.sectionInfo }}>
+            <h2 style={styles.sectionTitle}>{t.section4Title}</h2>
+            <ul style={styles.list}>{renderList(t.section4)}</ul>
+          </section>
+        </div>
 
-      {/* Кнопка "Понятно" */}
-      <button
-        style={styles.button}
-        onClick={() => alert(lang === 'ru' ? 'Вы ознакомились!' : 'Жакшы!')}
-        aria-label="Подтвердить ознакомление"
-      >
-        {t.understood}
-      </button>
+        {/* Кнопка "Понятно" */}
+        <button
+          style={styles.button}
+          onClick={() => alert(lang === 'ru' ? 'Вы ознакомились с правилами!' : 'Эрежелер менен тааныштыңыз!')}
+          aria-label={lang === 'ru' ? 'Подтвердить ознакомление' : 'Түшүнүктүү'}
+        >
+          {t.understood}
+        </button>
+      </div>
     </div>
   );
 }
 
 const styles = {
   container: {
-    maxWidth: 700,
-   
-    backgroundColor: '#121212',
-    padding: 24,
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    color: '#e0e0e0',
-    
-    boxShadow: '0 0 15px rgba(0,0,0,0.8)',
+    backgroundColor: '#1a1a1a',
+    minHeight: '100vh',
+    fontFamily: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+    color: '#f0f0f0',
+    paddingBottom: 40,
+  },
+  contentContainer: {
+    maxWidth: 800,
+    margin: '0 auto',
+    padding: '0 20px',
   },
   fixedTopBar: {
     display: 'flex',
     justifyContent: 'flex-end',
-    marginBottom: 20,
+    padding: '15px 20px',
+   
     position: 'sticky',
     top: 0,
+    zIndex: 100,
     
-    zIndex: 10,
-    paddingBottom: 10,
   },
   toggleButton: {
-    backgroundColor: '#1f1f1f',
-    borderRadius: 8,
-    padding: '8px 16px',
-    border: '1.5px solid #DAA520',
+    backgroundColor: '#1a1a1a',
+    borderRadius: 6,
+    padding: '8px 15px',
+    border: '1px solid #555',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
-    gap: 8,
-    transition: 'background-color 0.3s ease',
-    color: '#DAA520',
-    fontWeight: '600',
-    fontSize: 16,
+    gap: 10,
+    transition: 'all 0.2s',
+    color: '#FFD700',
+    fontWeight: 500,
+    fontSize: 15,
+    ':hover': {
+      backgroundColor: '#222',
+    },
   },
   flagText: {
-    fontSize: 22,
-  },
-  langText: {
-    userSelect: 'none',
+    fontSize: 20,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '900',
+    fontSize: 26,
+    fontWeight: 700,
     color: '#FFD700',
-    marginBottom: 20,
+    margin: '20px 0 25px',
     textAlign: 'center',
-    letterSpacing: 0.8,
-  
+    padding: '0 10px',
+  },
+  rulesContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 20,
   },
   section: {
     padding: 20,
-    borderRadius: 14,
-    marginBottom: 22,
-    borderLeftWidth: 8,
-    borderLeftStyle: 'solid',
-    backgroundColor: '#1e1e1e',
-    boxShadow: '0 4px 8px rgba(0,0,0,0.9)',
+    borderRadius: 10,
+    backgroundColor: '#1d1d1d',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
   },
-  sectionRed: {
-    borderLeftColor: '#e53935',
-    backgroundColor: '#2c1b1b',
+  sectionImportant: {
+    borderLeft: '4px solid #FFD700',
   },
-  sectionGray: {
-    borderLeftColor: '#888',
-    backgroundColor: '#262626',
+  sectionWarning: {
+    borderLeft: '4px solid #e74c3c',
+    backgroundColor: '#241a1a',
   },
-  sectionGold: {
-    borderLeftColor: '#FFD700',
-    backgroundColor: '#2a2a1f',
+  sectionInfo: {
+    borderLeft: '4px solid #3498db',
+    backgroundColor: '#1a1d24',
+    flex: 1,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 19,
+    fontWeight: 600,
     color: '#FFD700',
-    marginBottom: 14,
-   
+    marginTop: 0,
+    marginBottom: 15,
+    display: 'flex',
+    alignItems: 'center',
   },
   list: {
-    paddingLeft: 20,
+    padding: 0,
     margin: 0,
-    listStyleType: 'disc',
+    listStyleType: 'none',
+  },
+  listItemText: {
+    lineHeight: 1.5,
   },
   text: {
-    fontSize: 16,
-    lineHeight: 1.5,
+    fontSize: 15,
     color: '#e0e0e0',
+    marginBottom: 12,
+    display: 'flex',
+    gap: 10,
+    alignItems: 'flex-start',
   },
-  red: {
-    color: '#f44336',
-    fontWeight: '700',
+  listBullet: {
+    color: '#FFD700',
+    fontSize: 20,
+    lineHeight: 1,
+    flexShrink: 0,
+    marginTop: 2,
+  },
+  warningText: {
+    color: '#ff9e9e',
+  },
+  grid: {
+    display: 'flex',
+    gap: 20,
+    flexDirection: 'column',
+    '@media (min-width: 768px)': {
+      flexDirection: 'row',
+    }
   },
   button: {
     backgroundColor: '#FFD700',
-    padding: '14px 0',
-    borderRadius: 14,
-    width: '60%',
-    margin: '0 auto',
-    fontSize: 18,
-    fontWeight: '800',
+    padding: '15px 0',
+    borderRadius: 8,
+    width: '100%',
+    maxWidth: 300,
+    margin: '30px auto 0',
+    fontSize: 17,
+    fontWeight: 600,
     color: '#121212',
     cursor: 'pointer',
-    display: 'block',
-
     border: 'none',
-    transition: 'background-color 0.3s ease, color 0.3s ease',
+    transition: 'background-color 0.2s',
+    display: 'block',
+    ':hover': {
+      backgroundColor: '#ffea9d',
+    },
   },
 };

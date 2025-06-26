@@ -226,20 +226,21 @@ function AppLayout({ children }) {
 
   return (
     <div className="appContainer" style={{
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '100vh',
-      backgroundColor: PRIMARY_COLOR,
-      paddingBottom: '60px', /* Чтобы контент не скрывался под нижней панелью */
-    }}>
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100vh',
+  backgroundColor: PRIMARY_COLOR,
+  overflow: 'hidden',
+}}>
+
       <Header />
       <main className="content" style={{
-        flex: 1,
-     
-        maxWidth: '100%',
-        margin: '0',
-        width: '100%',
-      }}>
+  flex: 1,
+  overflowY: 'auto',
+  WebkitOverflowScrolling: 'touch',
+  paddingBottom: '55px', // место под табы
+}}>
+
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}

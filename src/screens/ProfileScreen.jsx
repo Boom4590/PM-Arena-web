@@ -9,17 +9,19 @@ const BACKEND_URL = 'https://pm-arena-backend-production.up.railway.app';
 const MANAGER_WHATSAPP = 'https://wa.me/996507535771';
 const ADMIN_PASSWORD = 'admin4590$';
 
-// Новые цвета дизайна
+// Обновленная цветовая палитра
 const BACKGROUND = '#121212';
-const CARD_BG = '#2C2C2C';
-const ACCENT = '#F0A400';
-const ACCENT_HOVER = '#FFB300';
-const TEXT_COLOR = '#FFFFFF';
-const INPUT_BG = '#1E1E1E';
-const INPUT_BORDER = '#444';
+const CARD_BG = '#1E1E1E';
+const ACCENT = '#FF9800';
+const ACCENT_HOVER = '#FFB74D';
+const TEXT_PRIMARY = '#FFFFFF';
+const TEXT_SECONDARY = '#BDBDBD';
+const SUCCESS = '#4CAF50';
+const ERROR_COLOR = '#F44336';
+const WARNING = '#FFC107';
+const INPUT_BG = '#121212';
+const INPUT_BORDER = '#424242';
 const INPUT_FOCUS_BORDER = ACCENT;
-const LINK_COLOR = '#29B6F6';
-const ERROR_COLOR = '#D7263D';
 
 export default function Profile() {
   const { userInfo, setUserInfo } = useContext(UserContext);
@@ -105,7 +107,7 @@ export default function Profile() {
   };
 
   if (!userInfo) {
-    return <div style={{...styles.centered, color: TEXT_COLOR}}>Пользователь не авторизован</div>;
+    return <div style={{...styles.centered, color: TEXT_PRIMARY}}>Пользователь не авторизован</div>;
   }
 
   return (
@@ -116,15 +118,24 @@ export default function Profile() {
           alt="Profile" 
           style={{...styles.image, border: `2px solid ${ACCENT}`}} 
         />
-        <div style={styles.flexx}>
-          <div style={styles.label}><strong>Pubg ID:</strong><div>{userInfo.pubg_id}</div> </div>
-          <div style={styles.label}><strong>Никнейм:</strong> <div>{userInfo.nickname}</div></div>
-          <div style={styles.label}><strong>Телефон:</strong> <div>{userInfo.phone}</div></div>
+        <div style={styles.infoContainer}>
+          <div style={styles.label}>
+            <span style={styles.labelText}>Pubg ID:</span>
+            <span style={styles.labelValue}>{userInfo.pubg_id}</span>
+          </div>
+          <div style={styles.label}>
+            <span style={styles.labelText}>Никнейм:</span>
+            <span style={styles.labelValue}>{userInfo.nickname}</span>
+          </div>
+          <div style={styles.label}>
+            <span style={styles.labelText}>Телефон:</span>
+            <span style={styles.labelValue}>{userInfo.phone}</span>
+          </div>
         </div>
       </div>
 
       <div style={styles.balanceBox}>
-        Баланс: <strong>{userInfo.balance} $</strong>
+        Баланс: <span style={styles.balanceValue}>{userInfo.balance} $</span>
       </div>
 
       <input
@@ -146,7 +157,9 @@ export default function Profile() {
         onClick={handlePay} 
         style={{
           ...styles.button,
-          backgroundColor: hoverPay ? ACCENT_HOVER : ACCENT,
+          background: hoverPay 
+            ? `linear-gradient(135deg, ${ACCENT_HOVER} 0%, #E65100 100%)` 
+            : `linear-gradient(135deg, ${ACCENT} 0%, #F57C00 100%)`,
         }}
         onMouseEnter={() => setHoverPay(true)}
         onMouseLeave={() => setHoverPay(false)}
@@ -159,7 +172,8 @@ export default function Profile() {
           onClick={handleManagerContact} 
           style={{
             ...styles.managerBtn,
-            backgroundColor: hoverManager ? '#4fc3f7' : LINK_COLOR,
+            backgroundColor: hoverManager ? '#FFD54F' : WARNING,
+            color: '#000',
           }}
           onMouseEnter={() => setHoverManager(true)}
           onMouseLeave={() => setHoverManager(false)}
@@ -171,7 +185,7 @@ export default function Profile() {
           onClick={handleManagerContact} 
           style={{
             ...styles.managerBtn,
-            backgroundColor: hoverManager ? '#4fc3f7' : LINK_COLOR,
+            backgroundColor: hoverManager ? '#66BB6A' : SUCCESS,
           }}
           onMouseEnter={() => setHoverManager(true)}
           onMouseLeave={() => setHoverManager(false)}
@@ -208,7 +222,7 @@ export default function Profile() {
               }}
               style={{
                 ...styles.cancelBtn,
-                backgroundColor: hoverCancel ? '#666' : '#444',
+                backgroundColor: hoverCancel ? '#424242' : '#333',
               }}
               onMouseEnter={() => setHoverCancel(true)}
               onMouseLeave={() => setHoverCancel(false)}
@@ -221,7 +235,7 @@ export default function Profile() {
         <div style={styles.bottomRow}>
           <button 
             onClick={() => setShowAdminInput(true)} 
-            style={{...styles.textBtn, color: LINK_COLOR}}
+            style={{...styles.textBtn, color: TEXT_SECONDARY}}
           >
             Промокод
           </button>
@@ -230,7 +244,7 @@ export default function Profile() {
               const confirmed = window.confirm('Вы уверены, что хотите выйти?');
               if (confirmed) logout();
             }}
-            style={{...styles.textBtn, color: LINK_COLOR}}
+            style={{...styles.textBtn, color: TEXT_SECONDARY}}
           >
             Выйти
           </button>
@@ -248,85 +262,93 @@ const styles = {
     backgroundColor: BACKGROUND,
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
     minHeight: '100vh',
-    color: TEXT_COLOR,
+    color: TEXT_PRIMARY,
   },
- profileRow: {
-  display: 'flex',
-  alignItems: 'center',
-  marginBottom: 30,
-  backgroundColor: CARD_BG,
-  borderRadius: 12,
-  padding: 20,
-  gap: 20,
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
-},
-
+  profileRow: {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: 30,
+    background:`linear-gradient(135deg, ${CARD_BG} 0%, #263238 100%)`,
+    borderRadius: 16,
+    padding: 24,
+    gap: 20,
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+  },
   image: {
     width: 90,
     height: 90,
     borderRadius: '50%',
-    marginRight: 20,
     objectFit: 'cover',
   },
-label: {
-width:'100%',
-  marginBottom: 10,
-  display: 'flex',
-  justifyContent:'space-between',
-  fontSize: 17,
-  lineHeight: 1.4,
-},
-
+  infoContainer: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 12,
+  },
+  label: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    fontSize: 16,
+    lineHeight: 1.5,
+  },
+  labelText: {
+    color: TEXT_SECONDARY,
+  },
+  labelValue: {
+    color: TEXT_PRIMARY,
+    fontWeight: '600',
+  },
   balanceBox: {
-  
-    padding: 15,
-    backgroundColor: '#222',
-    borderRadius: 10,
+    padding: 20,
+    background: CARD_BG,
+    borderRadius: 16,
     marginBottom: 25,
     textAlign: 'center',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '500',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
   },
- flexx: {
-  width:'60%',
-  display: 'flex',
-  flexDirection: 'column', // если хочешь вертикально
-  alignItems: 'flex-start', // прижать к левому краю по поперечной оси
-  justifyContent: 'space-between', // прижать к верхнему краю по основной оси
-  gap: '8px', // отступы между элементами для ровного визуала (по желанию)
-}
-,
+  balanceValue: {
+    color: '#white',
+    fontWeight: '700',
+    fontSize: '1.2em',
+  },
   input: {
     width: '100%',
-    padding: 14,
-    borderRadius: 8,
+    padding: 16,
+    borderRadius: 12,
     marginBottom: 20,
     fontSize: 16,
     backgroundColor: INPUT_BG,
-    color: TEXT_COLOR,
-    border: '1px solid',
+    color: TEXT_PRIMARY,
+    border: `1px solid ${INPUT_BORDER}`,
     outline: 'none',
-    transition: 'border-color 0.3s',
+    transition: 'border-color 0.3s, box-shadow 0.3s',
+    ':focus': {
+      borderColor: INPUT_FOCUS_BORDER,
+      boxShadow: `0 0 0 2px rgba(255, 152, 0, 0.2)`,
+    }
   },
   button: {
     width: '100%',
     padding: 16,
     color: '#000',
     fontSize: 16,
-    fontWeight: 'bold',
-    borderRadius: 8,
+    fontWeight: '700',
+    borderRadius: 12,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 15,
     cursor: 'pointer',
-    gap: 10,
+    gap: 12,
     border: 'none',
-    transition: 'background-color 0.3s, transform 0.2s',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+    transition: 'all 0.3s',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
     ':hover': {
-      transform: 'translateY(-2px)'
+      transform: 'translateY(-2px)',
+      boxShadow: '0 6px 14px rgba(0, 0, 0, 0.4)',
     }
   },
   icon: {
@@ -335,56 +357,58 @@ width:'100%',
   },
   managerBtn: {
     width: '100%',
-    padding: 14,
+    padding: 16,
     color: '#fff',
-    fontWeight: 'bold',
-    borderRadius: 8,
+    fontWeight: '600',
+    borderRadius: 12,
     cursor: 'pointer',
     marginBottom: 20,
-    backgroundColor:'rgb(0 122 63)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
     border: 'none',
-    transition: 'background-color 0.3s, transform 0.2s',
+    transition: 'all 0.3s',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
     ':hover': {
-      transform: 'translateY(-2px)'
+      transform: 'translateY(-2px)',
+      boxShadow: '0 6px 14px rgba(0, 0, 0, 0.4)',
     }
   },
   adminBtnRow: {
     display: 'flex',
     justifyContent: 'space-between',
     marginTop: 20,
-    gap: 10,
+    gap: 12,
   },
   adminBtn: {
     flex: 1,
     padding: 14,
     color: '#000',
-    fontWeight: 'bold',
-    borderRadius: 8,
+    fontWeight: '700',
+    borderRadius: 12,
     cursor: 'pointer',
     border: 'none',
-    transition: 'background-color 0.3s, transform 0.2s',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.2)',
+    transition: 'all 0.3s',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
     ':hover': {
-      transform: 'translateY(-2px)'
+      transform: 'translateY(-2px)',
+      boxShadow: '0 6px 14px rgba(0, 0, 0, 0.4)',
     }
   },
   cancelBtn: {
     flex: 1,
     padding: 14,
-    color: TEXT_COLOR,
-    fontWeight: 'bold',
-    borderRadius: 8,
+    color: TEXT_PRIMARY,
+    fontWeight: '600',
+    borderRadius: 12,
     cursor: 'pointer',
     border: 'none',
-    transition: 'background-color 0.3s, transform 0.2s',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.2)',
+    transition: 'all 0.3s',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
     ':hover': {
-      transform: 'translateY(-2px)'
+      transform: 'translateY(-2px)',
+      boxShadow: '0 6px 14px rgba(0, 0, 0, 0.4)',
     }
   },
   textBtn: {
@@ -392,17 +416,18 @@ width:'100%',
     border: 'none',
     textDecoration: 'none',
     cursor: 'pointer',
-    fontWeight: 'bold',
+    fontWeight: '600',
     fontSize: 15,
     transition: 'color 0.3s',
     ':hover': {
-      textDecoration: 'underline',
+      color: ACCENT,
     }
   },
   bottomRow: {
     display: 'flex',
     justifyContent: 'space-between',
     marginTop: 25,
+    padding: '0 10px',
   },
   centered: {
     padding: 50,
