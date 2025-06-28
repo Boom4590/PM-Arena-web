@@ -1,24 +1,38 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../UserContext';
-import { motion, AnimatePresence, color } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
+// Backend URL
 const BACKEND_URL = 'https://pm-arena-backend-production.up.railway.app';
 
-// Цветовая схема в стиле киберспорта
+// Modern, professional color scheme
 const COLORS = {
-  primary: '#121212',              // Чёрный основной фон
-  cardBg: '#1A1A1A',               // Тёмные карточки с глубиной
-  accent: '#FFB300',               // Мягкий янтарно-жёлтый (лучше чем ядро-жёлтый)
-  secondary: '#00B8D4',            // Холодный неон для градиента
-  tertiary: '#7C4DFF',             // Фиолетовый для редких вкраплений
-  text: '#E0E0E0',                 // Светлый текст
-  textSecondary: '#9E9E9E',        // Вторичный текст
-  error: '#EF5350',                // Красный, не режущий глаз
-  success: '#66BB6A',              // Зелёный подтверждения
-  warning: '#FFA726',              // Оранжевый для предупреждений
+  primary: '#0F1419',              // Deep black-blue
+  cardBg: '#1F2A33',               // Slightly lighter for cards
+  accent: '#D4A017',               // Soft gold for emphasis
+  secondary: '#1E88E5',            // Deep teal for highlights
+  tertiary: '#546E7A',             // Neutral slate for subtle accents
+  text: '#F7F9FA',                 // Crisp white for text
+  textSecondary: '#B0BEC5',        // Light gray for secondary text
+  error: '#C62828',                // Modern red for errors
+  success: '#2E7D32',              // Modern green for success
+  warning: '#EF6C00',              // Subtle orange for warnings
+  border: 'rgba(255, 255, 255, 0.12)', // Subtle border for depth
 };
 
+// Animation variants
+const fadeIn = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  transition: { duration: 0.5, ease: 'easeInOut' }
+};
+
+const slideUp = {
+  initial: { opacity: 0, y: 15 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.4, ease: 'easeOut' }
+};
 
 export default function Tournaments() {
   const { userInfo } = useContext(UserContext);
@@ -43,14 +57,13 @@ export default function Tournaments() {
         isParticipating: t.participants?.some(p => p.pubg_id === userInfo?.pubg_id) || false,
       }));
 
-      // Добавляем демо-турниры для заполнения
       setTournaments([
         ...updated,
         {
           id: 24,
-          mode: 'Erangel, Solo',
-          entry_fee: 50,
-          prize_pool: 4500,
+          mode: 'Erangel, Squad',
+          entry_fee: 10,
+          prize_pool: 900,
           start_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
           participants_count: 0,
           isParticipating: false,
@@ -59,8 +72,8 @@ export default function Tournaments() {
         {
           id: 25,
           mode: 'Miramar, Duo',
-          entry_fee: 70,
-          prize_pool: 6000,
+          entry_fee: 7,
+          prize_pool: 600,
           start_time: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
           participants_count: 0,
           isParticipating: false,
@@ -68,7 +81,7 @@ export default function Tournaments() {
         }
       ]);
     } catch {
-      console.error('Ошибка при загрузке турниров');
+      console.error('Error fetching tournaments');
     } finally {
       setLoading(false);
     }
@@ -112,24 +125,22 @@ export default function Tournaments() {
     setConfirmVisible(true);
   };
 
-  // Форматирование времени до начала турнира
   const formatTimeUntil = (startTime) => {
     const now = new Date();
     const start = new Date(startTime);
     const diffMs = start - now;
-    
+
     if (diffMs <= 0) return 'Начался';
-    
+
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     if (diffDays > 0) return `Через ${diffDays} д.`;
     if (diffHours > 0) return `Через ${diffHours} ч.`;
     return `Через ${diffMins} мин.`;
   };
 
-  // Форматирование даты
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString('ru-RU', {
@@ -140,7 +151,6 @@ export default function Tournaments() {
     });
   };
 
-  // Получение цвета статуса турнира
   const getStatusColor = (tournament) => {
     if (tournament.isParticipating) return COLORS.success;
     if (tournament.participants_count >= 100) return COLORS.error;
@@ -149,24 +159,22 @@ export default function Tournaments() {
 
   return (
     <div style={styles.container}>
-      <div style={styles.header}>
-        <h1 style={styles.title}><span style={styles.titleText}>Доступные турниры</span></h1>
-
+      <motion.div {...fadeIn} style={styles.header}>
+        <h1 style={styles.title}>Доступные турниры</h1>
         <p style={styles.subtitle}>Выберите турнир и участвуйте за призовые</p>
-      </div>
+      </motion.div>
 
       {loading ? (
         <div style={styles.loadingContainer}>
           <motion.div
             animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
             style={styles.spinner}
           />
           <p style={styles.loadingText}>Загрузка турниров...</p>
         </div>
       ) : tournaments.length === 0 ? (
         <div style={styles.emptyState}>
-          <div style={styles.emptyIcon}>🎮</div>
           <h3 style={styles.emptyTitle}>Турниры не найдены</h3>
           <p style={styles.emptyText}>Следите за обновлениями, скоро появятся новые турниры</p>
         </div>
@@ -193,70 +201,57 @@ export default function Tournaments() {
               return (
                 <motion.div
                   key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
+                  {...slideUp}
                   style={{
                     ...styles.card,
-                    borderLeft: `4px solid ${getStatusColor(item)}`
+                    borderLeft: `3px solid ${getStatusColor(item)}`,
                   }}
                 >
                   <div style={styles.cardHeader}>
                     <div style={styles.cardId}>#{item.id}</div>
                     <div style={styles.cardTime}>{timeUntil}</div>
                   </div>
-                  
                   <h3 style={styles.cardTitle}>{item.mode}</h3>
-                  
-                  <div style={styles.cardGrid}>
-                    <div style={styles.gridItem}>
-                      <div style={styles.gridLabel}>💵 Вход билет:</div>
-                      <div style={styles.gridValue}>{item.entry_fee}$</div>
+                  <div style={styles.cardContent}>
+                   
+                    <div style={styles.dataItem}>
+                      <span style={styles.dataLabel}>Взнос</span>
+                      <span style={{ ...styles.dataValue, color: COLORS.secondary }}>{item.entry_fee}$</span>
                     </div>
-                    
-                    <div style={styles.gridItem}>
-                      <div style={styles.gridLabel}>🏆 Приз. фонд:</div>
-                      <div style={styles.gridValue}>{item.prize_pool}$</div>
+                     <div style={styles.dataItem}>
+                      <span style={styles.dataLabel}>Призовой фонд</span>
+                      <span style={{ ...styles.dataValue, color: COLORS.accent }}>{item.prize_pool}$</span>
                     </div>
-                    
-                    <div style={styles.gridItem}>
-                      <div style={styles.gridLabel}>🕒 Дата Начало:</div>
-                      <div style={{ ...styles.gridValue, color: COLORS.textSecondary }}>
-                        {startTimeStr}
-                      </div>
+                    <div style={styles.dataItem}>
+                      <span style={styles.dataLabel}>Дата начала</span>
+                      <span style={{ ...styles.dataValue, color: COLORS.textSecondary }}>{startTimeStr}</span>
                     </div>
-                    
-                    <div style={styles.gridItem}>
-                      <div style={styles.gridLabel}>👥 Участники:</div>
-                      <div style={{...styles.gridValue,color:'#999 '}} >
-                        <strong style={{color:'#E0E0E0 ',fontSize:'14px'}}>{item.participants_count || 0}</strong> / 100
-                      </div>
+                    <div style={styles.dataItem}>
+                      <span style={styles.dataLabel}>Участники</span>
+                      <span style={styles.dataValue}>
+                        <strong>{item.participants_count || 0}</strong> / 100
+                      </span>
+                    </div>
+                    <div style={styles.progressContainer}>
+                      <div
+                        style={{
+                          ...styles.progressBar,
+                          width: `${Math.min(item.participants_count || 0, 100)}%`,
+                          backgroundColor: isFull ? COLORS.error : COLORS.secondary,
+                        }}
+                      />
                     </div>
                   </div>
-                  
-                  <div style={styles.progressContainer}>
-                    <div 
-                      style={{
-                        ...styles.progressBar,
-                        width: `${Math.min(item.participants_count || 0, 100)}%`,
-                        backgroundColor: isFull ? COLORS.error : COLORS.secondary
-                      }}
-                    />
-                  </div>
-                  
                   <motion.button
-                    whileHover={{ scale: disabled ? 1 : 1.03 }}
+                    whileHover={{ scale: disabled ? 1 : 1.02, backgroundColor: disabled ? COLORS.textSecondary : '#E8B923' }}
                     whileTap={{ scale: disabled ? 1 : 0.98 }}
                     disabled={item.isFake || disabled}
                     onClick={() => !item.isFake && handleJoinPress(item)}
                     style={{
                       ...styles.button,
-                      backgroundColor: item.isFake || disabled 
-                        ? COLORS.textSecondary 
-                        : COLORS.accent,
-                      opacity: item.isFake ? 0.7 : 1,
-                      cursor: item.isFake || disabled ? 'not-allowed' : 'pointer'
+                      backgroundColor: item.isFake || disabled ? COLORS.textSecondary : COLORS.accent,
+                      opacity: item.isFake || disabled ? 0.6 : 1,
+                      cursor: item.isFake || disabled ? 'not-allowed' : 'pointer',
                     }}
                   >
                     {item.isFake ? 'Скоро' : buttonText}
@@ -277,53 +272,44 @@ export default function Tournaments() {
             style={styles.modalOverlay}
             onClick={() => setConfirmVisible(false)}
           >
-            <motion.div 
-              initial={{ scale: 0.9, y: 20 }}
+            <motion.div
+              initial={{ scale: 0.95, y: 10 }}
               animate={{ scale: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
               style={styles.modalContainer}
               onClick={e => e.stopPropagation()}
             >
               <h3 style={styles.modalTitle}>Подтверждение участия</h3>
-              
               <div style={styles.tournamentInfo}>
                 <div style={styles.infoRow}>
-                  <span style={styles.infoLabel}>Турнир:</span>
+                  <span style={styles.infoLabel}>Турнир</span>
                   <span style={styles.infoValue}>#{selectedTournament?.id} · {selectedTournament?.mode}</span>
                 </div>
-                
                 <div style={styles.infoRow}>
-                  <span style={styles.infoLabel}>Взнос:</span>
-                  <span style={{ ...styles.infoValue, color: COLORS.accent }}>
-                    {selectedTournament?.entry_fee} $
-                  </span>
+                  <span style={styles.infoLabel}>Взнос</span>
+                  <span style={{ ...styles.infoValue, color: COLORS.secondary }}>{selectedTournament?.entry_fee} $</span>
                 </div>
-                
                 <div style={styles.infoRow}>
-                  <span style={styles.infoLabel}>Призовой фонд:</span>
-                  <span style={{ ...styles.infoValue, color: COLORS.secondary }}>
-                    {selectedTournament?.prize_pool} $
-                  </span>
+                  <span style={styles.infoLabel}>Призовой фонд</span>
+                  <span style={{ ...styles.infoValue, color: COLORS.accent }}>{selectedTournament?.prize_pool} $</span>
                 </div>
               </div>
-              
               <p style={styles.modalText}>
                 После подтверждения сумма будет списана с вашего баланса. Отменить участие нельзя.
               </p>
-              
               <div style={styles.modalButtons}>
-                <motion.button 
-                  whileHover={{ scale: 1.03 }}
+                <motion.button
+                  whileHover={{ scale: 1.02, backgroundColor: COLORS.cardBg }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setConfirmVisible(false)} 
+                  onClick={() => setConfirmVisible(false)}
                   style={styles.cancelBtn}
                 >
                   Отмена
                 </motion.button>
-                
-                <motion.button 
-                  whileHover={{ scale: 1.03 }}
+                <motion.button
+                  whileHover={{ scale: 1.02, backgroundColor: '#E8B923' }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={confirmJoin} 
+                  onClick={confirmJoin}
                   style={styles.confirmBtn}
                 >
                   Подтвердить
@@ -339,132 +325,123 @@ export default function Tournaments() {
 
 const styles = {
   container: {
-    padding: '16px 32px',
-    fontFamily: '"Rajdhani", "Arial Narrow", sans-serif',
-    background: `linear-gradient(45deg, #000, #333,#000)`,
+    padding: '48px 32px',
+    fontFamily: '"Inter", "Arial", sans-serif',
+    background: COLORS.primary,
     minHeight: '100vh',
     color: COLORS.text,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
   },
   header: {
-    marginBottom: '24px',
-    padding: '0 8px',
+    marginBottom: '56px',
+    textAlign: 'center',
   },
- title: {
-  fontSize: '28px',
-  fontWeight: 700,
-  margin: 0,
-  textAlign: 'center', // или 'center', как тебе нужно
-},
-titleText: {
-  background: `linear-gradient(180deg,rgb(214, 154, 2), rgb(214, 154, 2))`,
-  WebkitBackgroundClip: 'text',
-  textAlign:'center',
-  WebkitTextFillColor: 'transparent',
- 
-  textShadow: '0 0 15px rgba(240, 164, 0, 0.3)',
-}
-,
-
+  title: {
+    fontSize: '34px',
+    fontWeight: 700,
+    margin: 0,
+    color: COLORS.text,
+  },
   subtitle: {
-    fontSize: '16px',
+    fontSize: '18px',
     color: COLORS.textSecondary,
-    margin: '8px 0 0',
+    margin: '12px 0 0',
+    fontWeight: 400,
   },
   list: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-    gap: '36px',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
+    gap: '40px',
+    width: '100%',
+    maxWidth: '1280px',
   },
   card: {
-    background: '#222',
-borderRadius: '12px',
-boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
-border: '1px solid rgba(255,255,255,0.06)',
-
-  
-    padding: '20px 40px',
-   display: 'flex',
+    background: COLORS.cardBg,
+    borderRadius: '12px',
+    border: `1px solid ${COLORS.border}`,
+    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25)',
+    padding: '28px',
+    display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'space-between',
-    gap: '12px',
-    transition: 'transform 0.2s ease',
+    gap: '24px',
   },
   cardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '12px',
   },
   cardId: {
-    background: 'rgba(41, 182, 246, 0.1)',
-    color: COLORS.secondary,
-    padding: '4px 10px',
-    borderRadius: '20px',
-    fontSize: '14px',
-    fontWeight: 700,
-  },
-  cardTime: {
-    background: 'rgba(240, 164, 0, 0.1)',
-    color: COLORS.accent,
-    padding: '4px 10px',
-    borderRadius: '20px',
-    fontSize: '14px',
-    fontWeight: 700,
-  },
-  cardTitle: {
-    fontSize: '20px',
-    fontWeight: 700,
-    margin: '0 0 16px 0',
-    color: COLORS.text,
-  },
-  cardGrid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr',
-    gap: '10px',
-    borderTop: '1px solid rgba(255,255,255,0.1)',
-    paddingTop: '12px',
-    marginTop: '12px',
-  },
-  gridItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    borderBottom: '1px solid rgba(255,255,255,0.05)',
-    paddingBottom: '8px',
-  },
-  gridLabel: {
-    fontSize: '15px',
+    background: COLORS.cardBg,
     color: COLORS.textSecondary,
-    letterSpacing: '0.5px',
-    textTransform: 'uppercase',
-  },
-  gridValue: {
+    padding: '8px 16px',
+    borderRadius: '8px',
     fontSize: '15px',
     fontWeight: 600,
+    border: `1px solid ${COLORS.border}`,
+  },
+  cardTime: {
+    background: COLORS.cardBg,
+    color: COLORS.accent,
+    padding: '8px 16px',
+    borderRadius: '8px',
+    fontSize: '15px',
+    fontWeight: 600,
+    border: `1px solid ${COLORS.border}`,
+  },
+  cardTitle: {
+    fontSize: '24px',
+    fontWeight: 700,
+    margin: 0,
     color: COLORS.text,
-    textAlign: 'right',
+  },
+  cardContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+  },
+  dataItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingBottom: '12px',
+    borderBottom: `1px solid ${COLORS.border}`,
+  },
+  dataLabel: {
+    fontSize: '14px',
+    color: COLORS.textSecondary,
+    fontWeight: 500,
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  },
+  dataValue: {
+    fontSize: '16px',
+    fontWeight: 600,
+    color: COLORS.text,
   },
   progressContainer: {
-    height: '6px',
-    background: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: '3px',
-    marginBottom: '16px',
+    height: '8px',
+    background: COLORS.border,
+    borderRadius: '4px',
+    marginTop: '12px',
     overflow: 'hidden',
   },
   progressBar: {
     height: '100%',
-    borderRadius: '3px',
+    borderRadius: '4px',
     transition: 'width 0.5s ease',
   },
   button: {
     width: '100%',
-    padding: '12px',
+    padding: '14px',
     border: 'none',
-    borderRadius: '8px',
-    color: COLORS.primary,
-    fontWeight: 700,
+    borderRadius: '10px',
+    color: COLORS.text,
+    fontWeight: 600,
     fontSize: '16px',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    transition: 'all 0.3s ease',
+    background: COLORS.accent,
   },
   modalOverlay: {
     position: 'fixed',
@@ -472,81 +449,120 @@ border: '1px solid rgba(255,255,255,0.06)',
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1000,
-    backdropFilter: 'blur(5px)',
+    backdropFilter: 'blur(6px)',
   },
   modalContainer: {
-    backgroundColor: COLORS.cardBg,
-    padding: '30px',
-    borderRadius: '16px',
+    background: COLORS.cardBg,
+    padding: '32px',
+    borderRadius: '12px',
     width: '90%',
-    maxWidth: '450px',
-    border: `1px solid rgba(255, 255, 255, 0.1)`,
-    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
+    maxWidth: '500px',
+    border: `1px solid ${COLORS.border}`,
+    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
   },
   modalTitle: {
-    fontSize: '24px',
+    fontSize: '26px',
     fontWeight: 700,
-    margin: '0 0 20px',
+    margin: '0 0 24px',
     textAlign: 'center',
     color: COLORS.text,
   },
   tournamentInfo: {
-    background: 'rgba(255, 255, 255, 0.05)',
+    background: COLORS.cardBg,
     borderRadius: '10px',
-    padding: '15px',
-    marginBottom: '20px',
+    padding: '20px',
+    marginBottom: '24px',
+    border: `1px solid ${COLORS.border}`,
   },
   infoRow: {
     display: 'flex',
     justifyContent: 'space-between',
-    padding: '8px 0',
+    padding: '10px 0',
+    borderBottom: `1px solid ${COLORS.border}`,
   },
   infoLabel: {
+    fontSize: '15px',
     color: COLORS.textSecondary,
-    fontWeight: 600,
+    fontWeight: 500,
   },
   infoValue: {
-    fontWeight: 700,
+    fontSize: '15px',
+    fontWeight: 600,
+    color: COLORS.text,
   },
   modalText: {
-    fontSize: '14px',
+    fontSize: '15px',
     color: COLORS.textSecondary,
     textAlign: 'center',
-    margin: '20px 0',
-    lineHeight: 1.5,
+    margin: '24px 0',
+    lineHeight: 1.6,
   },
   modalButtons: {
     display: 'flex',
     justifyContent: 'space-between',
-    gap: '15px',
+    gap: '20px',
   },
   cancelBtn: {
     flex: 1,
     padding: '14px',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    background: COLORS.cardBg,
     color: COLORS.text,
-    fontWeight: 700,
-    borderRadius: '8px',
-    border: 'none',
+    fontWeight: 600,
+    borderRadius: '10px',
+    border: `1px solid ${COLORS.border}`,
     cursor: 'pointer',
-    fontSize: '16px',
-    transition: 'all 0.2s ease',
+    fontSize: '15px',
+    transition: 'all 0.3s ease',
   },
   confirmBtn: {
     flex: 1,
     padding: '14px',
-    background: `linear-gradient(45deg, ${COLORS.accent}, #FF8C00)`,
-    color: COLORS.primary,
-    fontWeight: 700,
-    borderRadius: '8px',
+    background: COLORS.accent,
+    color: COLORS.text,
+    fontWeight: 600,
+    borderRadius: '10px',
     border: 'none',
     cursor: 'pointer',
+    fontSize: '15px',
+    transition: 'all 0.3s ease',
+  },
+  loadingContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '50vh',
+  },
+  spinner: {
+    width: '50px',
+    height: '50px',
+    border: `5px solid ${COLORS.cardBg}`,
+    borderTop: `5px solid ${COLORS.accent}`,
+    borderRadius: '50%',
+  },
+  loadingText: {
+    marginTop: '20px',
     fontSize: '16px',
-    transition: 'all 0.2s ease',
+    color: COLORS.textSecondary,
+  },
+  emptyState: {
+    textAlign: 'center',
+    marginTop: '120px',
+    color: COLORS.textSecondary,
+  },
+  emptyTitle: {
+    fontSize: '26px',
+    fontWeight: 600,
+    marginBottom: '16px',
+    color: COLORS.text,
+  },
+  emptyText: {
+    fontSize: '16px',
+    marginBottom: '24px',
   },
 };
