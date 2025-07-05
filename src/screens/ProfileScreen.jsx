@@ -291,6 +291,7 @@ const styles = {
   },
   label: {
     display: 'flex',
+    flexDirection:'column',
     justifyContent: 'space-between',
     fontSize: 16,
     lineHeight: 1.5,

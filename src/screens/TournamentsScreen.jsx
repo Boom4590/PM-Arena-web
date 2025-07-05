@@ -351,8 +351,8 @@ const styles = {
     fontWeight: 400,
   },
   list: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
+    display: 'flex',
+    flexDirection:'column',
     gap: '40px',
     width: '100%',
     maxWidth: '1280px',

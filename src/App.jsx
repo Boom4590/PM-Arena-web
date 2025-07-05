@@ -57,14 +57,16 @@ function Header() {
   const showRules = ['/tournaments', '/current', '/StyledProfile'].includes(path);
   
   // Определяем тип экрана
-  const isVeryNarrow = windowWidth < 350;
-  const isNarrow = windowWidth < 420;
+  const isVeryNarrow = windowWidth < 400;
+  const isNarrow = windowWidth < 600;
 
   return (
     <header className="appHeader" style={{
       backgroundColor: PRIMARY_COLOR,
       borderBottom: `1px solid rgba(255, 255, 255, 0.1)`,
       padding: '12px 16px',
+      position:'fixed'
+      ,width:'100%'
     }}>
       <div className="headerContent" style={{
         display: 'flex',
@@ -154,10 +156,10 @@ function Header() {
             onClick={() => navigate('/instruction')}
           >
             {isVeryNarrow ? (
-              <IoInformationCircle size={18} />
+              <IoInformationCircle size={26} />
             ) : (
               <>
-                <IoInformationCircle size={18} style={{ marginRight: '4px' }} />
+                <IoInformationCircle size={26} style={{ marginLeft: '10px' }} />
                 Инструкция
               </>
             )}
@@ -238,7 +240,8 @@ function AppLayout({ children }) {
   flex: 1,
   overflowY: 'auto',
   WebkitOverflowScrolling: 'touch',
-  paddingBottom: '55px', // место под табы
+  paddingBottom: '55px',
+  paddingTop:'40px' // место под табы
 }}>
 
         <AnimatePresence mode="wait">
